@@ -3717,7 +3717,7 @@ def user_interface():
 if __name__ == '__main__':
 	multiprocessing.freeze_support()
 	
-	""" Surpress Error Messages which may occur during Multicore Operation """
+	""" Suppress error messages which may occur during multi-core operation. """
 	
 	ctypes.windll.kernel32.SetErrorMode(3)
 	
