@@ -1,7 +1,7 @@
 """ This script includes methods for geodesic measurements with GDAL/OGR as well as workarounds to ensure that GDAL libraries 
 are correctly passed to multicore processes and functions. This strongly affects how functions are defined and called in this script. """
 
-import gdal, ogr, osr, datetime, time, numpy, math, os, multiprocessing, multiprocessing.forking, shapely, shapely.ops, re, sys, ctypes, operator, pyproj, matplotlib.pyplot as plt
+import gdal, ogr, osr, datetime, time, numpy, math, os, multiprocessing, multiprocessing.forking, shapely, shapely.ops, re, sys, ctypes, operator, pyproj, images_qr, matplotlib.pyplot as plt
 from collections import defaultdict, Counter
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
@@ -38,7 +38,7 @@ class GUI_window(QWidget):
 		
 		self.setFixedSize(750, 625)
 		self.setWindowTitle("CSFD Tools")
-		self.setWindowIcon(QIcon("C:\\Christian\\Projects\\2016-07 Geodesic Polygon Buffer\\jo\\CSFD_ICON6.png"))
+		self.setWindowIcon(QIcon(":/CSFD_ICON6.ico"))
 		self.file_dialog_area()
 		
 		self.show()
@@ -3717,7 +3717,7 @@ def user_interface():
 if __name__ == '__main__':
 	multiprocessing.freeze_support()
 	
-	""" Suppress error messages which may occur during multi-core operation. """
+	""" Suppress error messages which may occur during multi-core operation """
 	
 	ctypes.windll.kernel32.SetErrorMode(3)
 	
