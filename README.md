@@ -9,9 +9,14 @@ A detailled documentation will be added soon.
 
 # Requirements
 
+The tool uses the following external libraries: 
 
-# Executable File
+GDAL and Shapely for geospatial applications and map projections
+PyQT4, Matplotlib Basemap, and descartes for the user interface layout
+Numpy for array management
 
+All libraries are included in the compiled version of CSFD Tools. No further software is required.  
+The compiled version was tested on Windows 7. 
 
 # Workflow
 
