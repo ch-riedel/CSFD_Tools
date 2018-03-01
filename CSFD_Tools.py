@@ -197,9 +197,9 @@ class GUI_window(QWidget):
 		
 		""" Logfile checkbox """
 		
-#		self.write_logfile_checkbox = QCheckBox("Write Logfile", self)
-#		self.write_logfile_checkbox.move(15, 545)
-#		self.write_logfile_checkbox.stateChanged.connect(self.write_logfile_mode)
+		self.write_logfile_checkbox = QCheckBox("Write Logfile", self)
+		self.write_logfile_checkbox.move(15, 545)
+		self.write_logfile_checkbox.stateChanged.connect(self.write_logfile_mode)
 		write_logfile = False
 		
 		""" Start button """
@@ -641,13 +641,13 @@ class GUI_window(QWidget):
 	
 	""" Write logfile """
 	
-#	def write_logfile_mode(self):
-#		global write_logfile
-#		
-#		if self.write_logfile_checkbox.isChecked() == True:
-#			write_logfile = True
-#		else:
-#			write_logfile = False
+	def write_logfile_mode(self):
+		global write_logfile
+		
+		if self.write_logfile_checkbox.isChecked() == True:
+			write_logfile = True
+		else:
+			write_logfile = False
 	
 	""" Change process labels with single-core / multi-core selection """
 	
@@ -732,7 +732,21 @@ class GUI_window(QWidget):
 """ Main function for processing CSFD measurement """
 
 def CSFD_measurement_main(generate_polygon_file, path_to_outfile, outfile_type, path_to_craterstats_outfile, area_file_field, Area_Names, approach, bufferfactor, bufferfactor_crater,  multicore_operation, write_logfile):
-	global union_polygon_centroid, total_area_size, ring_index, generate_point_file, generate_connectors_crater_polygon, layer_polygon, layer_crater, craters_for_counting_list, craters_within_range, craters_inside_area, craters_outside_area, craters_excluded_from_list, buffered_craters_wkt_list, crater_area_list
+	global union_polygon_centroid, total_area_size, ring_index, generate_point_file, generate_connectors_crater_polygon, layer_polygon, layer_crater, craters_for_counting_list, craters_within_range, craters_inside_area, craters_outside_area, craters_excluded_from_list, buffered_craters_wkt_list, crater_area_list, logfile
+	
+	""" Write Logfile """
+	
+	if write_logfile == True:
+		logfile_file_path = str(os.path.dirname(path_to_craterstats_outfile))
+		craterstats_file_name = str(os.path.basename(path_to_craterstats_outfile))
+		craterstats_file_name_2, craterstats_file_extension = os.path.splitext(craterstats_file_name)
+		logfile_name = str(craterstats_file_name_2) + ".log"
+		logfile_path = logfile_file_path + "/" + logfile_name
+		logfile = open(logfile_path, "w") 
+		logfile = open(logfile_path, "a") 
+		logfile.write("CSFD measurement Logfile" + "\n_____\n\n" + "Field: " + str(area_file_field) + "\n" + "Areas: " + str(Area_Names) + "\n" + "Approach: " + str(approach) + "\n" + "BF: " + str(bufferfactor) + "\n" + "OF: " + str(bufferfactor_crater) + "\n" + "Outfile Type: " + str(outfile_type) + "\n" + "Outfile Path: " + str(path_to_craterstats_outfile) + "\n" + "Multicore: " + str(multicore_operation) + "\n" + "Logfile: " + str(write_logfile) + "\n" + "Polygon File: " + str(generate_polygon_file) + "\n" + "Path to Polygon File: " + str(path_to_outfile) + "\n_____\n\n")
+	if write_logfile == False:
+		logfile = ""
 	
 	start_time = time.time()
 	start_time2 = time.time()
@@ -757,6 +771,8 @@ def CSFD_measurement_main(generate_polygon_file, path_to_outfile, outfile_type, 
 	layer_crater = crater_file.GetLayer()
 	
 	print "Number of Areas to be examined:", len(Area_Names)
+	if write_logfile == True:
+		logfile.write("Number of Areas to be examined: " + str(len(Area_Names)) + "\n")
 	
 	get_spheroid_information(layer, layer_crater)
 	
@@ -769,7 +785,7 @@ def CSFD_measurement_main(generate_polygon_file, path_to_outfile, outfile_type, 
 	""" Write SCC / DIAM Header """
 	
 	write_crater_stats_file_header()
-	read_crater_features(layer_crater, proj_to_geog, geog_to_eq_area_proj)
+	read_crater_features(layer_crater, proj_to_geog, geog_to_eq_area_proj, write_logfile, logfile)
 	
 	no_of_area_features_shapefile = layer.GetFeatureCount()
 	crater_area_list = []
@@ -801,7 +817,7 @@ def CSFD_measurement_main(generate_polygon_file, path_to_outfile, outfile_type, 
 				
 				""" Write SCC/DIAM area information. geom is reprojected to geographic coordinates here. """
 				
-				write_crater_stats_file_area(n_area, area_feature, area_feature2, area_feature_SCC_File, union_polygon, Area_Names, Area_ID, an)
+				write_crater_stats_file_area(n_area, area_feature, area_feature2, area_feature_SCC_File, union_polygon, Area_Names, Area_ID, an, write_logfile, logfile)
 				
 				#####################################################################################
 				#																					#
@@ -815,7 +831,9 @@ def CSFD_measurement_main(generate_polygon_file, path_to_outfile, outfile_type, 
 				
 				if approach == "TRAD":
 					
-					print "Determining craters within research area and buffered research area..."
+					print "Determining craters within research area..."
+					if write_logfile == True:
+						logfile.write("\nDetermining craters within research area...\n")
 					st = time.time()
 					
 					""" Find relevant craters (get_craters_for_trad function): """
@@ -830,6 +848,8 @@ def CSFD_measurement_main(generate_polygon_file, path_to_outfile, outfile_type, 
 						all_craters = all_craters + craters_for_counting_list
 					
 					print "Done.\n-\n", len(all_craters), "craters inside area\n-\nElapsed time for crater detection:", round(time.time()-st,2), "sec.\n\n-----\n"
+					if write_logfile == True:
+						logfile.write("Done.\n-\n" + str(len(all_craters)) + " craters inside area\n-\nElapsed time for crater detection: " + str(round(time.time()-st,2)) + " sec.\n\n-----\n")
 				
 				############################
 				# Buffered Crater Counting #
@@ -838,6 +858,8 @@ def CSFD_measurement_main(generate_polygon_file, path_to_outfile, outfile_type, 
 				if approach == "BCC":
 					
 					print "Determining craters within research area and buffered research area..."
+					if write_logfile == True:
+						logfile.write("Determining craters within research area and buffered research area...\n")
 					st = time.time()
 					
 					""" Find relevant craters (in get_craters_for_buffering_BCC function): """
@@ -857,6 +879,8 @@ def CSFD_measurement_main(generate_polygon_file, path_to_outfile, outfile_type, 
 					total_no_of_craters_within_area = len(craters_inside_area)
 						
 					print "Done.\n-\n", total_no_of_craters_within_area, "craters inside area, ", total_no_of_craters_within_range, "craters inside buffered area, ", no_of_crater_features-len(all_craters), "craters outside area.\n-\nElapsed time for crater detection:", round(time.time()-st,2), "sec.\n\n-----\n"
+					if write_logfile == True:
+						logfile.write("Done.\n-\n" + str(total_no_of_craters_within_area) + " craters inside area, " + str(total_no_of_craters_within_range) + " craters inside buffered area, " + str(no_of_crater_features-len(all_craters)) + " craters outside area.\n-\nElapsed time for crater detection: " + str(round(time.time()-st,2)) + " sec.\n\n-----\n")
 				
 				##################################################################
 				# Non-sparseness correction & Buffered non-sparseness correction #
@@ -865,6 +889,8 @@ def CSFD_measurement_main(generate_polygon_file, path_to_outfile, outfile_type, 
 				if approach == "NSC" or approach == "BNSC":
 					
 					print "Determining craters within research area and buffered research area..."
+					if write_logfile == True:
+						logfile.write("\nDetermining craters within research area and buffered research area...\n")
 					st = time.time()
 					
 					""" Find relevant craters (in get_craters_for_buffering_NSC_BNSC function): """
@@ -916,6 +942,8 @@ def CSFD_measurement_main(generate_polygon_file, path_to_outfile, outfile_type, 
 					total_no_of_craters_within_area = len(craters_inside_area)
 
 					print "\n", total_no_of_craters_within_area, "craters in area, ", total_no_of_craters_within_range, "craters in buffered area, ", no_of_crater_features - total_no_of_craters_within_area - total_no_of_craters_within_range, "craters outside area. \n", len(craters_excluded_from_list), "/", total_no_of_craters_within_area + total_no_of_craters_within_range, "craters excluded from CSFD analysis due to obliteration effects. \n\nElapsed time for crater detection:", round(time.time()-st,2), "sec.\n\n-----\n"
+					if write_logfile == True:
+						logfile.write("\n" + str(total_no_of_craters_within_area) + " craters in area, " + str(total_no_of_craters_within_range) + " craters in buffered area, " + str(no_of_crater_features - total_no_of_craters_within_area - total_no_of_craters_within_range) + " craters outside area. \n" + str(len(craters_excluded_from_list)) + " / " + str(total_no_of_craters_within_area + total_no_of_craters_within_range) + " craters excluded from CSFD analysis due to obliteration effects. \n\nElapsed time for crater detection: " + str(round(time.time()-st,2)) + " sec.\n\n-----\n")
 					del total_no_of_craters_within_range
 					del total_no_of_craters_within_area
 					
@@ -1042,7 +1070,7 @@ def CSFD_measurement_main(generate_polygon_file, path_to_outfile, outfile_type, 
 			""" Process definition """
 			
 			for all_craters_splitted_part in all_craters_splitted:
-				processes[process_count] = Process(target = buffer_area, args=(union_polygon, crater_area_list, all_craters_splitted_part, sr_wkt, generate_point_file, generate_polygon_file, generate_connectors_crater_polygon, flattening, major_axis, bufferfactor, crater_area_out_q, Area_IDs, multicore_operation, path_to_outfile, process_count, lock, layer_polygon))
+				processes[process_count] = Process(target = buffer_area, args=(union_polygon, crater_area_list, all_craters_splitted_part, sr_wkt, generate_point_file, generate_polygon_file, generate_connectors_crater_polygon, flattening, major_axis, bufferfactor, crater_area_out_q, Area_IDs, multicore_operation, path_to_outfile, process_count, lock, layer_polygon, write_logfile, logfile))
 				process_count += 1
 			process_count2 = 0
 			
@@ -1078,9 +1106,11 @@ def CSFD_measurement_main(generate_polygon_file, path_to_outfile, outfile_type, 
 			crater_area_out_q = multiprocessing.Queue()
 			process_count = 0
 			lock = multiprocessing.Lock()
-			buffer_area(union_polygon, crater_area_list, all_craters, sr, generate_point_file, generate_polygon_file, generate_connectors_crater_polygon, flattening, major_axis, bufferfactor, crater_area_out_q, Area_IDs, multicore_operation, path_to_outfile, process_count, lock, layer_polygon)
+			buffer_area(union_polygon, crater_area_list, all_craters, sr, generate_point_file, generate_polygon_file, generate_connectors_crater_polygon, flattening, major_axis, bufferfactor, crater_area_out_q, Area_IDs, multicore_operation, path_to_outfile, process_count, lock, layer_polygon, write_logfile, logfile)
 		
 		print "Done.\n-\n", len(all_craters), "Buffers created. \n-\nElapsed time for buffering:", str(round(time.time() - st_buffer, 2)), "sec.\n\n_____\n" 
+		if write_logfile == True:
+			logfile.write("\nDone.\n-\n" + str(len(all_craters)) + " Buffers created. \n-\nElapsed time for buffering: " + str(round(time.time() - st_buffer, 2)) + " sec.\n\n_____\n" )
 		create_crater_fractions_list(crater_area_list)
 		write_crater_stats_file_craters(crater_fractions_list)
 	
@@ -1089,6 +1119,8 @@ def CSFD_measurement_main(generate_polygon_file, path_to_outfile, outfile_type, 
 		craters_for_counting_list = all_craters 
 		
 		print "Buffering " + str(len(craters_for_counting_list)) + " Craters for non-sparseness correction..."
+		if write_logfile == True:
+			logfile.write("\nBuffering " + str(len(craters_for_counting_list)) + " Craters for non-sparseness correction...\n")
 		
 		if multicore_operation == True:
 			
@@ -1160,6 +1192,8 @@ def CSFD_measurement_main(generate_polygon_file, path_to_outfile, outfile_type, 
 		
 		if approach == "BNSC":
 			print "\nApplying buffer to reference area..."
+			if write_logfile == True:
+				logfile.write("\nApplying buffer to reference area...\n")
 		
 		""" It may happen that the global variable layer_polygon is not correctly passed to the buffer_area function. 
 		To avoid that, the variable is directly passed to the function. During multi-core, the layer_polygon variable is generated within the 
@@ -1202,7 +1236,7 @@ def CSFD_measurement_main(generate_polygon_file, path_to_outfile, outfile_type, 
 			
 			for craters_for_counting_list_BNSC_splitted_part in craters_for_counting_list_BNSC_splitted:
 				
-				processes[process_count] = Process(target = NSC_BNSC_exclude_craters, args=(approach, buffered_craters_wkt_list, union_polygon, sr_wkt, generate_polygon_file, path_to_outfile, craters_for_counting_list, craters_for_counting_list_BNSC_splitted_part, multicore_operation, layer_polygon, bufferfactor, bufferfactor_crater, process_count, crater_area_out_q, flattening, major_axis, Area_IDs))
+				processes[process_count] = Process(target = NSC_BNSC_exclude_craters, args=(approach, buffered_craters_wkt_list, union_polygon, sr_wkt, generate_polygon_file, path_to_outfile, craters_for_counting_list, craters_for_counting_list_BNSC_splitted_part, multicore_operation, layer_polygon, bufferfactor, bufferfactor_crater, process_count, crater_area_out_q, flattening, major_axis, Area_IDs, write_logfile, logfile))
 				process_count += 1
 			process_count2 = 0
 			
@@ -1237,12 +1271,16 @@ def CSFD_measurement_main(generate_polygon_file, path_to_outfile, outfile_type, 
 		if multicore_operation == False or approach == "NSC":
 			process_count = 0 # placeholder
 			crater_area_out_q = multiprocessing.Queue() # placeholder
-			NSC_BNSC_exclude_craters(approach, buffered_craters_wkt_list, union_polygon, sr_wkt, generate_polygon_file, path_to_outfile, craters_for_counting_list, craters_for_counting_list_BNSC, multicore_operation, layer_polygon, bufferfactor, bufferfactor_crater, process_count, crater_area_out_q, flattening, major_axis, Area_IDs)
+			NSC_BNSC_exclude_craters(approach, buffered_craters_wkt_list, union_polygon, sr_wkt, generate_polygon_file, path_to_outfile, craters_for_counting_list, craters_for_counting_list_BNSC, multicore_operation, layer_polygon, bufferfactor, bufferfactor_crater, process_count, crater_area_out_q, flattening, major_axis, Area_IDs, write_logfile, logfile)
 		
 		if approach == "NSC":
 			print "\n-----\n\n", len(craters_for_counting_list) - len(crater_area_list), "craters removed due to location outside reference area.\n", len(crater_area_list), "areas created. \n\nElapsed time for area modification:", str(round(time.time() - st_buffer, 2)), "sec.\n\n_____\n" 
+			if write_logfile == True:
+				logfile.write("\n-----\n\n" + str(len(craters_for_counting_list) - len(crater_area_list)) + " craters removed due to location outside reference area.\n" + str(len(crater_area_list)) + " areas created. \n\nElapsed time for area modification: " + str(round(time.time() - st_buffer, 2)) + " sec.\n\n_____\n")
 		if approach == "BNSC":
 			print "\n-----\n\n", len(crater_area_list), "areas created. \n\nElapsed time for area modification:", str(round(time.time() - st_buffer, 2)), "sec.\n\n_____\n" 
+			if write_logfile == True:
+				logfile.write("\n-----\n\n" + str(len(crater_area_list)) + " areas created. \n\nElapsed time for area modification: " + str(round(time.time() - st_buffer, 2)) + " sec.\n\n_____\n")
 		
 		create_crater_fractions_list(crater_area_list)
 		write_crater_stats_file_craters(crater_fractions_list)
@@ -1250,6 +1288,9 @@ def CSFD_measurement_main(generate_polygon_file, path_to_outfile, outfile_type, 
 	elapsed_time = time.time() - start_time
 	
 	print "Done. Elapsed time in total: " + str(round(elapsed_time, 2)) + " sec."
+	if write_logfile == True:
+		logfile.write("\nDone. Elapsed time in total: " + str(round(elapsed_time, 2)) + " sec.")
+		logfile.close()
 	
 	ctypes.windll.user32.MessageBoxA(0, "Done. Elapsed time in total: " + str(round(elapsed_time, 2)) + " sec." , "Done", 0)
 
@@ -1499,13 +1540,15 @@ def inverse_vincenty(flattening, major_axis, phi1, lambda1, phi2, lambda2 ):
 	
 """ Iterate crater features: add centroid coordinates and Diameter(km) to list. """
 
-def read_crater_features(layer_crater, proj_to_geog, geog_to_eq_area_proj):
+def read_crater_features(layer_crater, proj_to_geog, geog_to_eq_area_proj, write_logfile, logfile):
 	global crater_features_list, no_of_crater_features
 	
 	n = 0
 	no_of_crater_features =  layer_crater.GetFeatureCount()
 	crater_features_list = []
 	print "Number of digitized craters: ", no_of_crater_features, "\n_____\n"
+	if write_logfile == True:
+		logfile.write("Number of digitized craters: " + str(no_of_crater_features) + "\n_____\n\n")
 	
 	for crater in layer_crater:
 		crater_feature = layer_crater.GetFeature(n)
@@ -2342,7 +2385,7 @@ def get_area_size(union_polygon):
 
 """ Buffer research areas for buffered crater counting (geodesic buffer). """ 
 
-def buffer_area(union_polygon, crater_area_list, all_craters, sr_wkt, generate_point_file, generate_polygon_file, generate_connectors_crater_polygon, flattening, major_axis, bufferfactor, crater_area_out_q, Area_IDs, multicore_operation, path_to_outfile, process_count, lock, layer_polygon):
+def buffer_area(union_polygon, crater_area_list, all_craters, sr_wkt, generate_point_file, generate_polygon_file, generate_connectors_crater_polygon, flattening, major_axis, bufferfactor, crater_area_out_q, Area_IDs, multicore_operation, path_to_outfile, process_count, lock, layer_polygon, write_logfile, logfile):
 	from shapely.geometry import Point
 	global dist_buffer, vertices_angle_list, vertices_list, polygon_features_pass
 	
@@ -2467,7 +2510,13 @@ def buffer_area(union_polygon, crater_area_list, all_craters, sr_wkt, generate_p
 	union_polygon.Transform(geogr_to_proj_reprojection)
 	union_polygon.Transform(proj_reprojection_to_geogr_reprojection)
 	
+	""" Detailled logfile is only written in single-core mode """
+	
 	print "Buffering Area Polygons (", len(all_craters), ")..."
+	if write_logfile == True and multicore_operation == False:
+		logfile.write("\nBuffering Area Polygons ( " + str(len(all_craters)) + " )...\n")
+		logfile.flush()
+		
 	st = time.time()
 	
 	counter = 0
@@ -2703,6 +2752,12 @@ def buffer_area(union_polygon, crater_area_list, all_craters, sr_wkt, generate_p
 		if len(all_craters) > 0:
 			print "Process", process_count, ": Processing crater", crater[0], ":", round(((float(cr_cnt) / float(len(all_craters)))*100), 1), "%"
 		
+		""" Detailled logfile is only written in single-core mode """
+		
+		if write_logfile == True and multicore_operation == False:
+			logfile.write("Process " + str(process_count) +  ": Processing crater " + str(crater[0]) + ": " + str(round(((float(cr_cnt) / float(len(all_craters)))*100), 1)) + " %\n")
+			logfile.flush()
+		
 		""" Define geometries. """
 		
 		BCC_union_polygon = ogr.Geometry(ogr.wkbPolygon)
@@ -2775,6 +2830,9 @@ def buffer_area(union_polygon, crater_area_list, all_craters, sr_wkt, generate_p
 					
 					if polygon_part_splitted_buffered_polygon.IsValid() == False:
 						print "Error due to severe self-intersection during buffering. Please generate and check the output shapefile for errors."
+						if write_logfile == True and multicore_operation == False:
+							logfile.write("Error due to severe self-intersection during buffering. Please generate and check the output shapefile for errors.")
+							logfile.flush()
 						exit()
 					
 					BCC_union_polygon = BCC_union_polygon.Union(polygon_part_splitted_buffered_polygon)
@@ -2908,7 +2966,7 @@ def NSC_BNSC_buffer_craters(buffered_craters_out_q, craters_for_counting_list, f
 
 """ Modify initial reference areas for NSC and BNSC. """
 
-def NSC_BNSC_exclude_craters(approach, buffered_craters_wkt_list, union_polygon, sr_wkt, generate_polygon_file, path_to_outfile, craters_for_counting_list, craters_for_counting_list_BNSC, multicore_operation, layer_polygon, bufferfactor, bufferfactor_crater, process_count, crater_area_out_q, flattening, major_axis, Area_IDs):
+def NSC_BNSC_exclude_craters(approach, buffered_craters_wkt_list, union_polygon, sr_wkt, generate_polygon_file, path_to_outfile, craters_for_counting_list, craters_for_counting_list_BNSC, multicore_operation, layer_polygon, bufferfactor, bufferfactor_crater, process_count, crater_area_out_q, flattening, major_axis, Area_IDs, write_logfile, logfile):
 	from shapely.geometry import Point
 	global crater_area_list
 	
@@ -3028,6 +3086,12 @@ def NSC_BNSC_exclude_craters(approach, buffered_craters_wkt_list, union_polygon,
 		
 		if len(craters_for_counting_list) > 0:
 			print "Process", process_count, ": Processing crater", original_crater_id, ":", round(((float(crater_index) / float(len(craters_for_counting_list)))*100), 1), "%"
+			
+			""" Detailled logfile is only written in single-core mode """
+			
+			if write_logfile == True and multicore_operation == False:
+				logfile.write("Process " + str(process_count) + ": Processing crater " + str(original_crater_id) + ": " + str(round(((float(crater_index) / float(len(craters_for_counting_list)))*100), 1)) + " %\n")
+				logfile.flush()
 		
 		""" Start with largest crater, erase larger craters (craters with index -1) from initial reference area """
 		
@@ -3369,6 +3433,9 @@ def NSC_BNSC_exclude_craters(approach, buffered_craters_wkt_list, union_polygon,
 									
 									if polygon_part_splitted_buffered_polygon.IsValid() == False:
 										print "Error due to severe self-intersection during buffering. Please check the shapefile for errors."
+										if write_logfile == True and multicore_operation == False:
+											logfile.write("Error due to severe self-intersection during buffering. Please check the shapefile for errors.")
+											logfile.flush()
 										exit()
 									
 									BNSC_union_polygon = BNSC_union_polygon.Union(polygon_part_splitted_buffered_polygon)
@@ -3462,6 +3529,12 @@ def NSC_BNSC_exclude_craters(approach, buffered_craters_wkt_list, union_polygon,
 		crater_index += 1
 	crater_area_out_q.put(crater_area_list)
 	print process_count, "Done."
+	
+	""" Detailled logfile is only written in single-core mode """
+	
+	if write_logfile == True and multicore_operation == False:
+		logfile.write("Done.\n")
+		logfile.flush()
 
 """ Calculate fractions from craters and individual buffer areas. Until here, if more than one (n) research area was selected, the crater_area_list 
  stores informartion about every crater for every individual research area (crater1 - geodesic_area_1, crater1 - geodesic_area_2). As fractions 
@@ -3528,7 +3601,7 @@ def write_crater_stats_file_header():
 
 """ Write area information to SCC/DIAM file. """
 
-def write_crater_stats_file_area(n_area, area_feature, area_feature2, area_feature_SCC_File, union_polygon, Area_Names, Area_ID, an):
+def write_crater_stats_file_area(n_area, area_feature, area_feature2, area_feature_SCC_File, union_polygon, Area_Names, Area_ID, an, write_logfile, logfile):
 	global previous_vertex_count, vertices_list, inner_vertices_list, ring_index
 	
 	""" Get vertices from original polygon (area_feature_SCC_File) - to write original vertices to SCC File and segmentized polygon (area_feature) - to work with during processing. """
@@ -3574,6 +3647,8 @@ def write_crater_stats_file_area(n_area, area_feature, area_feature2, area_featu
 	""" Get outer ring vertices. """
 	
 	print "Area ", Area_ID, ":\n", "Number of Polygon vertices: ", no_of_polygon_vertices, "\n"
+	if write_logfile == True:
+		logfile.write("Area " + str(Area_ID) + ":\n" + "Number of Polygon vertices: " + str(no_of_polygon_vertices) + "\n")
 
 	for vertex in xrange(no_of_polygon_vertices):
 		current_vertex_X, current_vertex_Y, z = area_polygon_SCC_File.GetPoint(vertex)
