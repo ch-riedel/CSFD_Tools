@@ -204,7 +204,7 @@ class GUI_window(QWidget):
 		
 		""" Start button """
 		
-		button_start_CSFD = QPushButton("Start Crater Counting", self)
+		button_start_CSFD = QPushButton("Start CSFD Measurement", self)
 		button_start_CSFD.resize(140, 25)
 		button_start_CSFD.move(15, 585)
 		button_start_CSFD.clicked.connect(self.start_CSFD)
