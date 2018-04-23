@@ -211,29 +211,8 @@ class GUI_window(QWidget):
 		
 		""" Processes labels """
 		
-#		self.Processes_label = QLabel("Processes:", self)
-#		self.Processes_label.move(285, 590)
-#		self.no_of_cores = multiprocessing.cpu_count()
-#		self.no_of_processes = 1
-#		self.process_no_label = {}
-#		
-#		process_no = 0
-#		if self.no_of_cores <= 5:
-#			start_placing_y = 590
-#		if self.no_of_cores > 5:
-#			start_placing_y = 575
-#		if self.no_of_processes > 10:
-#			ctypes.windll.user32.MessageBoxA(0, "All " + str(self.no_of_processes) + " cores are used for multi-core data processing.\nThe status is only shown for the first ten processes in the user interface.", "Info", 0)
-#		while process_no < self.no_of_cores:
-#			process_no += 1
-#			if process_no <= 5:
-#				self.process_no_label[process_no] = QLabel("     ", self)
-#				self.process_no_label[process_no].move(315 + (process_no * 70), start_placing_y)
-#			if process_no > 5 and process_no <= 10:
-#				self.process_no_label[process_no] = QLabel("     ", self)
-#				self.process_no_label[process_no].move(315 + ((process_no-5) * 70), start_placing_y + 30)
-#		self.process_no_label[1].move(385, 590)
-#		self.process_no_label[1].setText("1:")
+		self.Processes_label = QLabel("                                                                                            ", self)
+		self.Processes_label.move(285, 590)
 		
 	""" ----- Define Button Functions ----- """
 	
@@ -649,45 +628,6 @@ class GUI_window(QWidget):
 		else:
 			write_logfile = False
 	
-	""" Change process labels with single-core / multi-core selection """
-	
-#	def draw_processes(self, no_of_cores, no_of_processes):
-#		
-#		if no_of_processes <= 5:
-#			start_placing_y = 590
-#		if no_of_processes > 5:
-#			start_placing_y = 575
-#		
-#		process_no = 0
-#		
-#		""" Only display and align process 1 and hide the other ones in the user interface """
-#		
-#		if no_of_processes == 1:
-#			while process_no < self.no_of_cores:
-#				process_no += 1
-#				if process_no == 1:
-#					self.process_no_label[process_no].move(315 + (process_no * 70), start_placing_y)
-#				else:
-#					self.process_no_label[process_no].setText("")
-#		
-#		""" Display and allign all processes in the user interface """
-#		
-#		if no_of_processes > 1:
-#			if self.no_of_cores > 10:
-#				ctypes.windll.user32.MessageBoxA(0, "All " + str(self.no_of_cores) + " cores are used for multi-core data processing.\nThe status is only shown for the first ten processes in the user interface.", "Info", 0)
-#			while process_no < self.no_of_cores:
-#				process_no += 1
-#				if process_no <= 5:
-#					if process_no == 1:
-#						self.process_no_label[process_no].move(315 + (process_no * 70), start_placing_y)
-#					else:
-#						self.process_no_label[process_no].setText(str(process_no) + ":")
-#				if process_no > 5 and process_no <= 10:
-#					if process_no == 1:
-#						self.process_no_label[process_no].move(315 + (process_no * 70), start_placing_y)
-#					else:
-#						self.process_no_label[process_no].setText(str(process_no) + ":")
-	
 	""" Start button - Get attributes for crater counting """
 	
 	def start_CSFD(self):
@@ -721,8 +661,13 @@ class GUI_window(QWidget):
 			print "Selected Parameters: "
 			print "Field:", area_file_field, "\n", "Areas:", Area_Names, "\n", "Approach:", approach, "\n", "BF:", bufferfactor, "\n", "OF:", bufferfactor_crater, "\n", "Outfile Type:", outfile_type, "\n", "Outfile Path:", path_to_craterstats_outfile,"\n", "Multicore:", multicore_operation, "\n", "Logfile:", write_logfile, "\n", "Polygon File:", generate_polygon_file, "\n", "Path to Polygon File:", path_to_outfile, "\n_____\n"
 			
-			CSFD_measurement_main(generate_polygon_file, path_to_outfile, outfile_type, path_to_craterstats_outfile, area_file_field, Area_Names, approach, bufferfactor, bufferfactor_crater,  multicore_operation, write_logfile)
-
+			CSFD_measurement_main(self, generate_polygon_file, path_to_outfile, outfile_type, path_to_craterstats_outfile, area_file_field, Area_Names, approach, bufferfactor, bufferfactor_crater,  multicore_operation, write_logfile)
+	
+	""" Update Process Label """
+	
+	def update_process_label(self, label_text):
+		self.Processes_label.setText(label_text)
+		
 #########################################
 #										#
 # FUNCTIONS FOR CSFD MEASUREMENTS BELOW	#
@@ -731,9 +676,9 @@ class GUI_window(QWidget):
 
 """ Main function for processing CSFD measurement """
 
-def CSFD_measurement_main(generate_polygon_file, path_to_outfile, outfile_type, path_to_craterstats_outfile, area_file_field, Area_Names, approach, bufferfactor, bufferfactor_crater,  multicore_operation, write_logfile):
+def CSFD_measurement_main(self, generate_polygon_file, path_to_outfile, outfile_type, path_to_craterstats_outfile, area_file_field, Area_Names, approach, bufferfactor, bufferfactor_crater,  multicore_operation, write_logfile):
 	global union_polygon_centroid, total_area_size, ring_index, generate_point_file, generate_connectors_crater_polygon, layer_polygon, layer_crater, craters_for_counting_list, craters_within_range, craters_inside_area, craters_outside_area, craters_excluded_from_list, buffered_craters_wkt_list, crater_area_list, logfile
-	
+
 	""" Write Logfile """
 	
 	if write_logfile == True:
@@ -744,7 +689,9 @@ def CSFD_measurement_main(generate_polygon_file, path_to_outfile, outfile_type, 
 		logfile_path = logfile_file_path + "/" + logfile_name
 		logfile = open(logfile_path, "w") 
 		logfile = open(logfile_path, "a") 
-		logfile.write("CSFD measurement Logfile" + "\n_____\n\n" + "Field: " + str(area_file_field) + "\n" + "Areas: " + str(Area_Names) + "\n" + "Approach: " + str(approach) + "\n" + "BF: " + str(bufferfactor) + "\n" + "OF: " + str(bufferfactor_crater) + "\n" + "Outfile Type: " + str(outfile_type) + "\n" + "Outfile Path: " + str(path_to_craterstats_outfile) + "\n" + "Multicore: " + str(multicore_operation) + "\n" + "Logfile: " + str(write_logfile) + "\n" + "Polygon File: " + str(generate_polygon_file) + "\n" + "Path to Polygon File: " + str(path_to_outfile) + "\n_____\n\n")
+		sys.stdout = logfile
+		sys.stderr = logfile
+		logfile.write("CSFD Measurement Logfile" + "\n_____\n\n" + "Field: " + str(area_file_field) + "\n" + "Areas: " + str(Area_Names) + "\n" + "Approach: " + str(approach) + "\n" + "BF: " + str(bufferfactor) + "\n" + "OF: " + str(bufferfactor_crater) + "\n" + "Outfile Type: " + str(outfile_type) + "\n" + "Outfile Path: " + str(path_to_craterstats_outfile) + "\n" + "Multicore: " + str(multicore_operation) + "\n" + "Logfile: " + str(write_logfile) + "\n" + "Polygon File: " + str(generate_polygon_file) + "\n" + "Path to Polygon File: " + str(path_to_outfile) + "\n_____\n\n")
 	if write_logfile == False:
 		logfile = ""
 	
@@ -761,6 +708,12 @@ def CSFD_measurement_main(generate_polygon_file, path_to_outfile, outfile_type, 
 	
 	if multicore_operation == True:
 		no_of_processes = multiprocessing.cpu_count() - 1 
+	if multicore_operation == False:
+		no_of_processes = 1
+	
+	""" status_out_q is used to measure status of data processing in % """
+	
+	status_out_q = multiprocessing.Queue()
 	
 	""" Open files """
 	
@@ -772,7 +725,7 @@ def CSFD_measurement_main(generate_polygon_file, path_to_outfile, outfile_type, 
 	
 	print "Number of Areas to be examined:", len(Area_Names)
 	if write_logfile == True:
-		logfile.write("Number of Areas to be examined: " + str(len(Area_Names)) + "\n")
+		logfile.flush()
 	
 	get_spheroid_information(layer, layer_crater)
 	
@@ -803,6 +756,7 @@ def CSFD_measurement_main(generate_polygon_file, path_to_outfile, outfile_type, 
 	Also, craters within research area (and buffered research area) are determined """
 	
 	union_polygon = ogr.Geometry(ogr.wkbPolygon)
+	
 	for an in Area_Names:
 		i = 0
 		while i < no_of_area_features_shapefile:
@@ -832,8 +786,12 @@ def CSFD_measurement_main(generate_polygon_file, path_to_outfile, outfile_type, 
 				if approach == "TRAD":
 					
 					print "Determining craters within research area..."
+					
+					self.update_process_label("Process 1/2 Determining relevant impact craters...")
+					QApplication.processEvents()
+					
 					if write_logfile == True:
-						logfile.write("\nDetermining craters within research area...\n")
+						logfile.flush()
 					st = time.time()
 					
 					""" Find relevant craters (get_craters_for_trad function): """
@@ -849,7 +807,7 @@ def CSFD_measurement_main(generate_polygon_file, path_to_outfile, outfile_type, 
 					
 					print "Done.\n-\n", len(all_craters), "craters inside area\n-\nElapsed time for crater detection:", round(time.time()-st,2), "sec.\n\n-----\n"
 					if write_logfile == True:
-						logfile.write("Done.\n-\n" + str(len(all_craters)) + " craters inside area\n-\nElapsed time for crater detection: " + str(round(time.time()-st,2)) + " sec.\n\n-----\n")
+						logfile.flush()
 				
 				############################
 				# Buffered Crater Counting #
@@ -857,9 +815,13 @@ def CSFD_measurement_main(generate_polygon_file, path_to_outfile, outfile_type, 
 				
 				if approach == "BCC":
 					
-					print "Determining craters within research area and buffered research area..."
+					print "Determining craters within research area and buffered research area..."		
+					
+					self.update_process_label("Process 1/2 Determining relevant impact craters...")
+					QApplication.processEvents()
+					
 					if write_logfile == True:
-						logfile.write("Determining craters within research area and buffered research area...\n")
+						logfile.flush()
 					st = time.time()
 					
 					""" Find relevant craters (in get_craters_for_buffering_BCC function): """
@@ -880,7 +842,7 @@ def CSFD_measurement_main(generate_polygon_file, path_to_outfile, outfile_type, 
 						
 					print "Done.\n-\n", total_no_of_craters_within_area, "craters inside area, ", total_no_of_craters_within_range, "craters inside buffered area, ", no_of_crater_features-len(all_craters), "craters outside area.\n-\nElapsed time for crater detection:", round(time.time()-st,2), "sec.\n\n-----\n"
 					if write_logfile == True:
-						logfile.write("Done.\n-\n" + str(total_no_of_craters_within_area) + " craters inside area, " + str(total_no_of_craters_within_range) + " craters inside buffered area, " + str(no_of_crater_features-len(all_craters)) + " craters outside area.\n-\nElapsed time for crater detection: " + str(round(time.time()-st,2)) + " sec.\n\n-----\n")
+						logfile.flush()
 				
 				##################################################################
 				# Non-sparseness correction & Buffered non-sparseness correction #
@@ -889,8 +851,12 @@ def CSFD_measurement_main(generate_polygon_file, path_to_outfile, outfile_type, 
 				if approach == "NSC" or approach == "BNSC":
 					
 					print "Determining craters within research area and buffered research area..."
+					
+					self.update_process_label("Process 1/3 Determining relevant impact craters...")
+					QApplication.processEvents()
+					
 					if write_logfile == True:
-						logfile.write("\nDetermining craters within research area and buffered research area...\n")
+						logfile.flush()
 					st = time.time()
 					
 					""" Find relevant craters (in get_craters_for_buffering_NSC_BNSC function): """
@@ -943,7 +909,7 @@ def CSFD_measurement_main(generate_polygon_file, path_to_outfile, outfile_type, 
 
 					print "\n", total_no_of_craters_within_area, "craters in area, ", total_no_of_craters_within_range, "craters in buffered area, ", no_of_crater_features - total_no_of_craters_within_area - total_no_of_craters_within_range, "craters outside area. \n", len(craters_excluded_from_list), "/", total_no_of_craters_within_area + total_no_of_craters_within_range, "craters excluded from CSFD analysis due to obliteration effects. \n\nElapsed time for crater detection:", round(time.time()-st,2), "sec.\n\n-----\n"
 					if write_logfile == True:
-						logfile.write("\n" + str(total_no_of_craters_within_area) + " craters in area, " + str(total_no_of_craters_within_range) + " craters in buffered area, " + str(no_of_crater_features - total_no_of_craters_within_area - total_no_of_craters_within_range) + " craters outside area. \n" + str(len(craters_excluded_from_list)) + " / " + str(total_no_of_craters_within_area + total_no_of_craters_within_range) + " craters excluded from CSFD analysis due to obliteration effects. \n\nElapsed time for crater detection: " + str(round(time.time()-st,2)) + " sec.\n\n-----\n")
+						logfile.flush()
 					del total_no_of_craters_within_range
 					del total_no_of_craters_within_area
 					
@@ -1025,6 +991,9 @@ def CSFD_measurement_main(generate_polygon_file, path_to_outfile, outfile_type, 
 	
 	if approach == "TRAD":
 		
+		self.update_process_label("Process 2/2 Writing outfile...")
+		QApplication.processEvents()
+		
 		write_crater_stats_file_craters_TRAD(all_craters)
 	
 	if approach == "BCC":
@@ -1063,6 +1032,7 @@ def CSFD_measurement_main(generate_polygon_file, path_to_outfile, outfile_type, 
 			""" Queue for passing list results """
 			
 			crater_area_out_q = multiprocessing.Queue()
+			multicore_log_out_q = multiprocessing.Queue()
 			
 			processes = dict()
 			process_count = 0
@@ -1070,18 +1040,38 @@ def CSFD_measurement_main(generate_polygon_file, path_to_outfile, outfile_type, 
 			""" Process definition """
 			
 			for all_craters_splitted_part in all_craters_splitted:
-				processes[process_count] = Process(target = buffer_area, args=(union_polygon, crater_area_list, all_craters_splitted_part, sr_wkt, generate_point_file, generate_polygon_file, generate_connectors_crater_polygon, flattening, major_axis, bufferfactor, crater_area_out_q, Area_IDs, multicore_operation, path_to_outfile, process_count, lock, layer_polygon, write_logfile, logfile))
+				processes[process_count] = Process(target = buffer_area, args=(0, union_polygon, crater_area_list, all_craters_splitted_part, sr_wkt, generate_point_file, generate_polygon_file, generate_connectors_crater_polygon, flattening, major_axis, bufferfactor, crater_area_out_q, Area_IDs, multicore_operation, path_to_outfile, process_count, lock, layer_polygon, write_logfile, logfile, multicore_log_out_q, status_out_q)) # self is set to 0 since GUI can't be multiplied for multi-core process
 				process_count += 1
 			process_count2 = 0
 			
 			""" Process start """
 			
+			self.update_process_label("Starting multi-core processes for process 2/2... ")
+			QApplication.processEvents()
+			
 			for all_craters_splitted_part in all_craters_splitted:
 				processes[process_count2].start()
 				process_count2 += 1
-				
-			""" Get crater area lists from multiprocessing operations.  """
 			
+			""" Get status information and update imformation in GUI """	
+			
+			statuses_percent = [0] * len(all_craters_splitted)
+			finished = 0
+			while finished < len(all_craters_splitted):
+				result_q = status_out_q.get()
+				
+				if result_q == 9999999999:
+					finished += 1
+				else:
+					statuses_percent[result_q[0]] = result_q[1]
+					results_percent = round(sum(statuses_percent)/len(all_craters_splitted), 2)
+					#print results_percent
+					
+					self.update_process_label("Process 2/2 Modifying reference areas... " + str(results_percent) +"%")
+					QApplication.processEvents()
+			
+			""" Get crater area lists from multiprocessing operations.  """
+			logfile_from_multiprocessing = []
 			for all_craters_splitted_part in all_craters_splitted:
 				crater_area_from_multiprocessing = crater_area_out_q.get()
 				
@@ -1091,7 +1081,17 @@ def CSFD_measurement_main(generate_polygon_file, path_to_outfile, outfile_type, 
 					crater_area_list = crater_area_from_multiprocessing
 				else:
 					crater_area_list = crater_area_list + crater_area_from_multiprocessing
-				
+			
+				""" Get logfile information """
+			
+				if write_logfile == True:
+					logfile_part_from_multiprocessing = multicore_log_out_q.get()
+					
+					""" Write information to logfile. """
+					
+					for logfile_item in logfile_part_from_multiprocessing:
+						logfile.write(str(logfile_item[0]) + "\n")			
+			
 			""" Terminate processes. """
 			
 			process_count3 = 0
@@ -1104,13 +1104,14 @@ def CSFD_measurement_main(generate_polygon_file, path_to_outfile, outfile_type, 
 			if generate_polygon_file == False:
 				layer_polygon = 0
 			crater_area_out_q = multiprocessing.Queue()
+			multicore_log_out_q = multiprocessing.Queue()
 			process_count = 0
 			lock = multiprocessing.Lock()
-			buffer_area(union_polygon, crater_area_list, all_craters, sr, generate_point_file, generate_polygon_file, generate_connectors_crater_polygon, flattening, major_axis, bufferfactor, crater_area_out_q, Area_IDs, multicore_operation, path_to_outfile, process_count, lock, layer_polygon, write_logfile, logfile)
+			buffer_area(self, union_polygon, crater_area_list, all_craters, sr, generate_point_file, generate_polygon_file, generate_connectors_crater_polygon, flattening, major_axis, bufferfactor, crater_area_out_q, Area_IDs, multicore_operation, path_to_outfile, process_count, lock, layer_polygon, write_logfile, logfile, multicore_log_out_q, status_out_q)
 		
 		print "Done.\n-\n", len(all_craters), "Buffers created. \n-\nElapsed time for buffering:", str(round(time.time() - st_buffer, 2)), "sec.\n\n_____\n" 
 		if write_logfile == True:
-			logfile.write("\nDone.\n-\n" + str(len(all_craters)) + " Buffers created. \n-\nElapsed time for buffering: " + str(round(time.time() - st_buffer, 2)) + " sec.\n\n_____\n" )
+			logfile.flush()
 		create_crater_fractions_list(crater_area_list)
 		write_crater_stats_file_craters(crater_fractions_list)
 	
@@ -1119,8 +1120,12 @@ def CSFD_measurement_main(generate_polygon_file, path_to_outfile, outfile_type, 
 		craters_for_counting_list = all_craters 
 		
 		print "Buffering " + str(len(craters_for_counting_list)) + " Craters for non-sparseness correction..."
+		
+		self.update_process_label("Process 2/3 Determining zones of crater obliteration...")
+		QApplication.processEvents()
+		
 		if write_logfile == True:
-			logfile.write("\nBuffering " + str(len(craters_for_counting_list)) + " Craters for non-sparseness correction...\n")
+			logfile.flush()
 		
 		if multicore_operation == True:
 			
@@ -1193,7 +1198,7 @@ def CSFD_measurement_main(generate_polygon_file, path_to_outfile, outfile_type, 
 		if approach == "BNSC":
 			print "\nApplying buffer to reference area..."
 			if write_logfile == True:
-				logfile.write("\nApplying buffer to reference area...\n")
+				logfile.flush()
 		
 		""" It may happen that the global variable layer_polygon is not correctly passed to the buffer_area function. 
 		To avoid that, the variable is directly passed to the function. During multi-core, the layer_polygon variable is generated within the 
@@ -1236,15 +1241,35 @@ def CSFD_measurement_main(generate_polygon_file, path_to_outfile, outfile_type, 
 			
 			for craters_for_counting_list_BNSC_splitted_part in craters_for_counting_list_BNSC_splitted:
 				
-				processes[process_count] = Process(target = NSC_BNSC_exclude_craters, args=(approach, buffered_craters_wkt_list, union_polygon, sr_wkt, generate_polygon_file, path_to_outfile, craters_for_counting_list, craters_for_counting_list_BNSC_splitted_part, multicore_operation, layer_polygon, bufferfactor, bufferfactor_crater, process_count, crater_area_out_q, flattening, major_axis, Area_IDs, write_logfile, logfile))
+				processes[process_count] = Process(target = NSC_BNSC_exclude_craters, args=(0, approach, buffered_craters_wkt_list, union_polygon, sr_wkt, generate_polygon_file, path_to_outfile, craters_for_counting_list, craters_for_counting_list_BNSC_splitted_part, multicore_operation, layer_polygon, bufferfactor, bufferfactor_crater, process_count, crater_area_out_q, flattening, major_axis, Area_IDs, write_logfile, logfile, status_out_q)) # self is set to 0 to avoid duplication of user interface during multi-core computation
 				process_count += 1
 			process_count2 = 0
 			
 			""" Process start """
 			
+			self.update_process_label("Starting multi-core processes for process 3/3... ")
+			QApplication.processEvents()
+			
 			for craters_for_counting_list_BNSC_splitted_part in craters_for_counting_list_BNSC_splitted:
 				processes[process_count2].start()
 				process_count2 += 1
+			
+			""" Get status information and update imformation in GUI """	
+			
+			statuses_percent = [0] * len(craters_for_counting_list_BNSC_splitted)
+			finished = 0
+			while finished < len(craters_for_counting_list_BNSC_splitted):
+				result_q = status_out_q.get()
+				
+				if result_q == 9999999999:
+					finished += 1
+				else:
+					statuses_percent[result_q[0]] = result_q[1]
+					results_percent = round(sum(statuses_percent)/len(craters_for_counting_list_BNSC_splitted), 2)
+					#print results_percent
+					
+					self.update_process_label("Process 3/3 Modifying reference areas... " + str(results_percent) +"%")
+					QApplication.processEvents()
 			
 			""" Get crater area lists from multiprocessing operations  """
 			
@@ -1271,16 +1296,16 @@ def CSFD_measurement_main(generate_polygon_file, path_to_outfile, outfile_type, 
 		if multicore_operation == False or approach == "NSC":
 			process_count = 0 # placeholder
 			crater_area_out_q = multiprocessing.Queue() # placeholder
-			NSC_BNSC_exclude_craters(approach, buffered_craters_wkt_list, union_polygon, sr_wkt, generate_polygon_file, path_to_outfile, craters_for_counting_list, craters_for_counting_list_BNSC, multicore_operation, layer_polygon, bufferfactor, bufferfactor_crater, process_count, crater_area_out_q, flattening, major_axis, Area_IDs, write_logfile, logfile)
+			NSC_BNSC_exclude_craters(self, approach, buffered_craters_wkt_list, union_polygon, sr_wkt, generate_polygon_file, path_to_outfile, craters_for_counting_list, craters_for_counting_list_BNSC, multicore_operation, layer_polygon, bufferfactor, bufferfactor_crater, process_count, crater_area_out_q, flattening, major_axis, Area_IDs, write_logfile, logfile, status_out_q)
 		
 		if approach == "NSC":
 			print "\n-----\n\n", len(craters_for_counting_list) - len(crater_area_list), "craters removed due to location outside reference area.\n", len(crater_area_list), "areas created. \n\nElapsed time for area modification:", str(round(time.time() - st_buffer, 2)), "sec.\n\n_____\n" 
 			if write_logfile == True:
-				logfile.write("\n-----\n\n" + str(len(craters_for_counting_list) - len(crater_area_list)) + " craters removed due to location outside reference area.\n" + str(len(crater_area_list)) + " areas created. \n\nElapsed time for area modification: " + str(round(time.time() - st_buffer, 2)) + " sec.\n\n_____\n")
+				logfile.flush()
 		if approach == "BNSC":
 			print "\n-----\n\n", len(crater_area_list), "areas created. \n\nElapsed time for area modification:", str(round(time.time() - st_buffer, 2)), "sec.\n\n_____\n" 
 			if write_logfile == True:
-				logfile.write("\n-----\n\n" + str(len(crater_area_list)) + " areas created. \n\nElapsed time for area modification: " + str(round(time.time() - st_buffer, 2)) + " sec.\n\n_____\n")
+				logfile.flush()
 		
 		create_crater_fractions_list(crater_area_list)
 		write_crater_stats_file_craters(crater_fractions_list)
@@ -1288,11 +1313,18 @@ def CSFD_measurement_main(generate_polygon_file, path_to_outfile, outfile_type, 
 	elapsed_time = time.time() - start_time
 	
 	print "Done. Elapsed time in total: " + str(round(elapsed_time, 2)) + " sec."
-	if write_logfile == True:
-		logfile.write("\nDone. Elapsed time in total: " + str(round(elapsed_time, 2)) + " sec.")
-		logfile.close()
 	
 	ctypes.windll.user32.MessageBoxA(0, "Done. Elapsed time in total: " + str(round(elapsed_time, 2)) + " sec." , "Done", 0)
+	
+	self.update_process_label("Done.")
+
+	if write_logfile == True:
+		logfile.flush()
+		logfile.close()
+		del logfile
+		sys.stdout = sys.__stdout__
+		sys.stderr = sys.__stderr__
+		return
 
 """ Get information on reference body from Shapefile metadata. """
 
@@ -1548,7 +1580,7 @@ def read_crater_features(layer_crater, proj_to_geog, geog_to_eq_area_proj, write
 	crater_features_list = []
 	print "Number of digitized craters: ", no_of_crater_features, "\n_____\n"
 	if write_logfile == True:
-		logfile.write("Number of digitized craters: " + str(no_of_crater_features) + "\n_____\n\n")
+		logfile.flush()
 	
 	for crater in layer_crater:
 		crater_feature = layer_crater.GetFeature(n)
@@ -2385,1136 +2417,1150 @@ def get_area_size(union_polygon):
 
 """ Buffer research areas for buffered crater counting (geodesic buffer). """ 
 
-def buffer_area(union_polygon, crater_area_list, all_craters, sr_wkt, generate_point_file, generate_polygon_file, generate_connectors_crater_polygon, flattening, major_axis, bufferfactor, crater_area_out_q, Area_IDs, multicore_operation, path_to_outfile, process_count, lock, layer_polygon, write_logfile, logfile):
+def buffer_area(self, union_polygon, crater_area_list, all_craters, sr_wkt, generate_point_file, generate_polygon_file, generate_connectors_crater_polygon, flattening, major_axis, bufferfactor, crater_area_out_q, Area_IDs, multicore_operation, path_to_outfile, process_count, lock, layer_polygon, write_logfile, logfile, multicore_log_out_q, status_out_q):
+
 	from shapely.geometry import Point
 	global dist_buffer, vertices_angle_list, vertices_list, polygon_features_pass
 	
-	polygon_features_pass = []
-	
-	""" convert spatial reference from wkt to spatial reference type (during multiprocessing). Also, Transformations etc. need to be defined as Spatial reference data type can't
-	be handed to function during multiprocessing """
-	
-	if isinstance(sr_wkt, basestring) == True:
-		sr = osr.SpatialReference()
-		sr.ImportFromWkt(sr_wkt)
+	try:
+		multicore_log = []
 		
-	if isinstance(sr_wkt, basestring) == False:
-		sr = sr_wkt
-	
-	""" GDAL objects such as layers, spatial references etc. can't be passed to a multi-core process (Swig objects can't 
-	be pickled). This is why we declare a new output shapefile layer here. There are as many output files generated as there are multi-core processes. """
-	
-	if multicore_operation == True:
-		if generate_polygon_file == True:
-			outfile_split = os.path.split(path_to_outfile)
-			outfile_path = str(outfile_split[0]) + "\\"
-			outfile_name = str(outfile_split[1])
-			outfile_name_no_extension = os.path.splitext(outfile_name)[0]
+		polygon_features_pass = []
+		
+		""" convert spatial reference from wkt to spatial reference type (during multiprocessing). Also, Transformations etc. need to be defined as Spatial reference data type can't
+		be handed to function during multiprocessing """
+		
+		if isinstance(sr_wkt, basestring) == True:
+			sr = osr.SpatialReference()
+			sr.ImportFromWkt(sr_wkt)
 			
-			driver = ogr.GetDriverByName('ESRI Shapefile')
-			polygon_data_source = driver.CreateDataSource(outfile_path + outfile_name_no_extension + "_" + str(process_count) + ".shp")
-			layer_polygon = polygon_data_source.CreateLayer('Buffer_Polygon', sr, geom_type = ogr.wkbPolygon)
-			
-			idField = ogr.FieldDefn('Crater_ID', ogr.OFTString)
-			layer_polygon.CreateField(idField)
-			idField = ogr.FieldDefn('Size_sq_km', ogr.OFTReal)
-			layer_polygon.CreateField(idField)
-			idField = ogr.FieldDefn('Buffer_m', ogr.OFTReal)
-			layer_polygon.CreateField(idField)
-	
-	""" Transform vertices to geographic coordinates if spatial reference is projected. This doesn't apply when area_polygon is already geographic. 
-	Reprojecting would lead to false coordinates otherwise. Grographic area_polygon and Projected sr can occur when (only) one research area is in 
-	union_polygon and that research area has at least one hole. The error occurs with iterating the first inner ring. 
-	
-	Also, a geographic and a projected reference system from the input spatial reference is defined. """
-	
-	if sr.IsProjected():
-		union_polygon.Segmentize(10000)
-	if sr.IsGeographic():
-		union_polygon.Segmentize(1)
-	
-	if sr.IsProjected():
-		geogr_sr = sr.CloneGeogCS()
-		sr_text = 'PROJCS["PROJECTED_LAMBERT_AEA",'+str(geogr_sr)+',PROJECTION["Lambert_Azimuthal_Equal_Area"],PARAMETER["False_Easting",0.0],PARAMETER["False_Northing",0.0],PARAMETER["central_meridian",0.0],PARAMETER["latitude_of_origin",0.0],UNIT["Meter",1.0]]'
-		proj_to_geog = osr.CoordinateTransformation(sr, geogr_sr)
-		geog_to_proj = osr.CoordinateTransformation(geogr_sr, sr)
-		union_polygon_sr = union_polygon.GetSpatialReference()
-		if union_polygon_sr:
-			if union_polygon_sr.IsProjected():
+		if isinstance(sr_wkt, basestring) == False:
+			sr = sr_wkt
+		
+		""" GDAL objects such as layers, spatial references etc. can't be passed to a multi-core process (Swig objects can't 
+		be pickled). This is why we declare a new output shapefile layer here. There are as many output files generated as there are multi-core processes. """
+		
+		if multicore_operation == True:
+			if generate_polygon_file == True:
+				outfile_split = os.path.split(path_to_outfile)
+				outfile_path = str(outfile_split[0]) + "\\"
+				outfile_name = str(outfile_split[1])
+				outfile_name_no_extension = os.path.splitext(outfile_name)[0]
+				
+				driver = ogr.GetDriverByName('ESRI Shapefile')
+				polygon_data_source = driver.CreateDataSource(outfile_path + outfile_name_no_extension + "_" + str(process_count) + ".shp")
+				layer_polygon = polygon_data_source.CreateLayer('Buffer_Polygon', sr, geom_type = ogr.wkbPolygon)
+				
+				idField = ogr.FieldDefn('Crater_ID', ogr.OFTString)
+				layer_polygon.CreateField(idField)
+				idField = ogr.FieldDefn('Size_sq_km', ogr.OFTReal)
+				layer_polygon.CreateField(idField)
+				idField = ogr.FieldDefn('Buffer_m', ogr.OFTReal)
+				layer_polygon.CreateField(idField)
+		
+		""" Transform vertices to geographic coordinates if spatial reference is projected. This doesn't apply when area_polygon is already geographic. 
+		Reprojecting would lead to false coordinates otherwise. Grographic area_polygon and Projected sr can occur when (only) one research area is in 
+		union_polygon and that research area has at least one hole. The error occurs with iterating the first inner ring. 
+		
+		Also, a geographic and a projected reference system from the input spatial reference is defined. """
+		
+		if sr.IsProjected():
+			union_polygon.Segmentize(10000)
+		if sr.IsGeographic():
+			union_polygon.Segmentize(1)
+		
+		if sr.IsProjected():
+			geogr_sr = sr.CloneGeogCS()
+			sr_text = 'PROJCS["PROJECTED_LAMBERT_AEA",'+str(geogr_sr)+',PROJECTION["Lambert_Azimuthal_Equal_Area"],PARAMETER["False_Easting",0.0],PARAMETER["False_Northing",0.0],PARAMETER["central_meridian",0.0],PARAMETER["latitude_of_origin",0.0],UNIT["Meter",1.0]]'
+			proj_to_geog = osr.CoordinateTransformation(sr, geogr_sr)
+			geog_to_proj = osr.CoordinateTransformation(geogr_sr, sr)
+			union_polygon_sr = union_polygon.GetSpatialReference()
+			if union_polygon_sr:
+				if union_polygon_sr.IsProjected():
+					union_polygon.Transform(proj_to_geog)
+			if not union_polygon_sr:
 				union_polygon.Transform(proj_to_geog)
-		if not union_polygon_sr:
-			union_polygon.Transform(proj_to_geog)
-	if sr.IsGeographic():
-		geogr_sr = sr
-		proj_to_geog = osr.CoordinateTransformation(sr, geogr_sr)
-		geog_to_proj = osr.CoordinateTransformation(geogr_sr, sr)
-		sr_text = 'PROJCS["PROJECTED_LAMBERT_AEA",'+str(geogr_sr)+',PROJECTION["Lambert_Azimuthal_Equal_Area"],PARAMETER["False_Easting",0.0],PARAMETER["False_Northing",0.0],PARAMETER["central_meridian",0.0],PARAMETER["latitude_of_origin",0.0],UNIT["Meter",1.0]]'
-	
-	""" Get center of research area to define projection center  """
-	
-	union_polygon_centroid = union_polygon.Centroid()
-	union_polygon_centroid_X, union_polygon_centroid_Y, union_polygon_centroid_Z = union_polygon_centroid.GetPoint()
-	
-	projection_center_X = round(union_polygon_centroid_X, 1)
-	projection_center_Y = round(union_polygon_centroid_Y, 1)
-	
-	""" If a polygon intersects a dateline, it may happen that the centroid is wrongly identified (Polygon intersects dateline vs. 
-	Polygon spans globe with a hole over dateline). If polygon cuts lines (which we assume to be datelines) at lon -179.8 and lon 179.8, we assume that a dateline 
-	intersection is present. In this case, we set the projection center to (false projection center (if closer than 80 deg lon to central meridian) + 100 deg 
-	lon). It is quite experimental to set a fixed lon value for such cases but it worked in all cases we tested. """
-	
-	dateline_1 = ogr.Geometry(ogr.wkbLineString)
-	dateline_1.AddPoint(-179, 90)
-	dateline_1.AddPoint(-179, -90)
-
-	dateline_2 = ogr.Geometry(ogr.wkbLineString)
-	dateline_2.AddPoint(179, 90)
-	dateline_2.AddPoint(179, -90)
-	
-	""" If both lines (lon +179.8 & -179.8) are intersecting the polygon we assume a dateline intersection rather than a global polygon. """
-	
-	if union_polygon.Intersects(dateline_1) == True and union_polygon.Intersects(dateline_2) == True:
-		if projection_center_X < 80 and projection_center_X > -80:
-			projection_center_X = projection_center_X + 100
-	
-	""" Change reference meridian in geographic coordinate system to center of input polygon to avoid problems during dateline intersection. This new geographic 
-	coordinate system is used for an equal area projection which consists of the geographic reference with new reference meridian and a Mollweide projected system
-	with a central meridian at 0deg. """
-	
-	geogr_sr_reprojection_text = re.sub('(PRIMEM)(.*)(,)', r'\1["Reference_Meridian",' + str(projection_center_X) + '],', str(geogr_sr))
-	geogr_sr_reprojection = osr.SpatialReference(geogr_sr_reprojection_text)
-	
-	proj_cs_section_text = sr_text.partition('PROJECTION')
-	
-	sr_eq_area_reprojection_text = 'PROJCS["LAEA_REPROJECTION_EQ_AREA",'+str(geogr_sr_reprojection_text)+',PROJECTION' + proj_cs_section_text[2]		
-	sr_eq_area_reprojection = osr.SpatialReference(sr_eq_area_reprojection_text)
-	
-	sr_reprojection_text = 'PROJCS["LAEA_REPROJECTION_EQ_AREA",'+str(geogr_sr_reprojection_text)+',PROJECTION["Lambert_Azimuthal_Equal_Area"],PARAMETER["False_Easting",0.0],PARAMETER["False_Northing",0.0],PARAMETER["central_meridian",' + str(projection_center_X) + '],PARAMETER["latitude_of_origin",' + str(projection_center_Y) + '],UNIT["Meter",1.0]]'
-	sr_reprojection = osr.SpatialReference(sr_reprojection_text)
-	
-	""" Define reprojections. """
-	
-	geogr_to_geogr_reprojection = osr.CoordinateTransformation(geogr_sr, geogr_sr_reprojection)
-	geogr_to_proj_reprojection = osr.CoordinateTransformation(geogr_sr, sr_reprojection)
-	proj_reprojection_to_geogr_reprojection = osr.CoordinateTransformation(sr_reprojection, geogr_sr_reprojection)
-	geogr_reprojection_to_proj_reprojection = osr.CoordinateTransformation(geogr_sr_reprojection, sr_reprojection)
-	proj_reprojection_to_geogr = osr.CoordinateTransformation(sr_reprojection, geogr_sr)
-	geogr_reprojection_to_geogr = osr.CoordinateTransformation(geogr_sr_reprojection, geogr_sr)
-	geogr_reprojection_to_eq_area = osr.CoordinateTransformation(geogr_sr_reprojection, sr_eq_area_reprojection)
-	eq_area_proj_to_proj = osr.CoordinateTransformation(sr_eq_area_reprojection, sr)
-	geogr_to_eq_area = osr.CoordinateTransformation(geogr_sr, sr_eq_area_reprojection)
-	sr_to_eq_area = osr.CoordinateTransformation(sr, sr_eq_area_reprojection)
-	
-	""" Reproject input data to new geographic projection in order to avoid problems during dateline intersections. """
-	
-	union_polygon.Transform(geogr_to_proj_reprojection)
-	union_polygon.Transform(proj_reprojection_to_geogr_reprojection)
-	
-	""" Detailled logfile is only written in single-core mode """
-	
-	print "Buffering Area Polygons (", len(all_craters), ")..."
-	if write_logfile == True and multicore_operation == False:
-		logfile.write("\nBuffering Area Polygons ( " + str(len(all_craters)) + " )...\n")
-		logfile.flush()
+		if sr.IsGeographic():
+			geogr_sr = sr
+			proj_to_geog = osr.CoordinateTransformation(sr, geogr_sr)
+			geog_to_proj = osr.CoordinateTransformation(geogr_sr, sr)
+			sr_text = 'PROJCS["PROJECTED_LAMBERT_AEA",'+str(geogr_sr)+',PROJECTION["Lambert_Azimuthal_Equal_Area"],PARAMETER["False_Easting",0.0],PARAMETER["False_Northing",0.0],PARAMETER["central_meridian",0.0],PARAMETER["latitude_of_origin",0.0],UNIT["Meter",1.0]]'
 		
-	st = time.time()
+		""" Get center of research area to define projection center  """
+		
+		union_polygon_centroid = union_polygon.Centroid()
+		union_polygon_centroid_X, union_polygon_centroid_Y, union_polygon_centroid_Z = union_polygon_centroid.GetPoint()
+		
+		projection_center_X = round(union_polygon_centroid_X, 1)
+		projection_center_Y = round(union_polygon_centroid_Y, 1)
+		
+		""" If a polygon intersects a dateline, it may happen that the centroid is wrongly identified (Polygon intersects dateline vs. 
+		Polygon spans globe with a hole over dateline). If polygon cuts lines (which we assume to be datelines) at lon -179.8 and lon 179.8, we assume that a dateline 
+		intersection is present. In this case, we set the projection center to (false projection center (if closer than 80 deg lon to central meridian) + 100 deg 
+		lon). It is quite experimental to set a fixed lon value for such cases but it worked in all cases we tested. """
+		
+		dateline_1 = ogr.Geometry(ogr.wkbLineString)
+		dateline_1.AddPoint(-179, 90)
+		dateline_1.AddPoint(-179, -90)
 	
-	counter = 0
-	linear_ring_count = 0
-	vertices_angle_list = dict()
-	
-	for area in union_polygon:
+		dateline_2 = ogr.Geometry(ogr.wkbLineString)
+		dateline_2.AddPoint(179, 90)
+		dateline_2.AddPoint(179, -90)
 		
-		number_of_inner_polygons = 0
-		number_of_holes = 0
+		""" If both lines (lon +179.8 & -179.8) are intersecting the polygon we assume a dateline intersection rather than a global polygon. """
 		
-		#############################
-		#	Step 1: CUT POLYGON		#
-		#############################
+		if union_polygon.Intersects(dateline_1) == True and union_polygon.Intersects(dateline_2) == True:
+			if projection_center_X < 80 and projection_center_X > -80:
+				projection_center_X = projection_center_X + 100
 		
-		""" Determine number of polygons and number of holes to correctly split and buffer the data. """
+		""" Change reference meridian in geographic coordinate system to center of input polygon to avoid problems during dateline intersection. This new geographic 
+		coordinate system is used for an equal area projection which consists of the geographic reference with new reference meridian and a Mollweide projected system
+		with a central meridian at 0deg. """
 		
-		if area.GetGeometryName() == "LINEARRING":
-			area_polygon = ogr.Geometry(ogr.wkbPolygon)
-			area_polygon.AddGeometry(area)
-		else:
-			area_polygon = ogr.Geometry(ogr.wkbPolygon)
-			area_polygon.AddGeometry(area.GetGeometryRef(0)) 
+		geogr_sr_reprojection_text = re.sub('(PRIMEM)(.*)(,)', r'\1["Reference_Meridian",' + str(projection_center_X) + '],', str(geogr_sr))
+		geogr_sr_reprojection = osr.SpatialReference(geogr_sr_reprojection_text)
 		
-		if area.GetGeometryName() == "LINEARRING":
-			number_of_holes = union_polygon.GetGeometryCount() - 1
-			#print "There is one inner polygon and", number_of_holes, "holes in this polygon."
-			
-		if area.GetGeometryName() == "POLYGON":
-			number_of_inner_polygons = union_polygon.GetGeometryCount()
-			number_of_holes = area.GetGeometryCount() - 1 # When union_polygon becomes MULTIPOLYGON due to clip and buffer (formation of islands) 
-			#print "There are", number_of_inner_polygons, "inner polygons and", area.GetGeometryCount() - 1, "holes in this polygon."
+		proj_cs_section_text = sr_text.partition('PROJECTION')
 		
-		""" Get inner rings: Get centroid of hole and split union_polygon or area into multiple parts according to holes. This way, only outlines need to be buffered (buffering 
-		outlines is faster than buffering an inner ring). """
+		sr_eq_area_reprojection_text = 'PROJCS["LAEA_REPROJECTION_EQ_AREA",'+str(geogr_sr_reprojection_text)+',PROJECTION' + proj_cs_section_text[2]		
+		sr_eq_area_reprojection = osr.SpatialReference(sr_eq_area_reprojection_text)
 		
-		if number_of_holes > 0:
-			if area.GetGeometryName() == "LINEARRING":
-				union_polygon_2 = ogr.CreateGeometryFromWkt(union_polygon.ExportToWkt())
-			if area.GetGeometryName() == "POLYGON":
-				area_2 = ogr.CreateGeometryFromWkt(area.ExportToWkt())
-			
-			for hole_count in range(number_of_holes):
-				if number_of_inner_polygons == 0:
-					inner_ring_geometry = union_polygon.GetGeometryRef(hole_count + 1)
-				if number_of_inner_polygons > 0:
-					inner_ring_geometry = area.GetGeometryRef(hole_count + 1)
-				
-				""" Get center of inner ring. Inner ring geometry has to be transformed from LINEARRING to POLYGON geometry. """
-				
-				inner_ring_polygon_geometry = ogr.Geometry(ogr.wkbPolygon)
-				inner_ring_polygon_geometry.AddGeometry(inner_ring_geometry)
-				
-				inner_ring_centroid = inner_ring_polygon_geometry.Centroid()
-				inner_ring_centroid_X, inner_ring_centroid_Y, inner_ring_centroid_Z = inner_ring_centroid.GetPoint()
-				
-				""" Generate lines which intersect centroid of inner rings.  """
-				
-				cut_line = ogr.Geometry(ogr.wkbLineString)
-				cut_line.AddPoint(0, 90)
-				cut_line.AddPoint(inner_ring_centroid_X, inner_ring_centroid_Y)
-				cut_line.AddPoint(0, -90)
-				cut_line.Segmentize(1)
-				
-				""" Generate splitted area from reference area and (buffered) split lines. OGR doesn't support polygon splitting 
-				by lines. """
-				
-				buffered_cut_line = cut_line.Buffer(0.00000000001) 
-				if area.GetGeometryName() == "LINEARRING":
-					union_polygon_2 = union_polygon_2.Difference(buffered_cut_line)
-					area_polygon = union_polygon_2
-				if area.GetGeometryName() == "POLYGON":
-					area_2 = area_2.Difference(buffered_cut_line)
-					area_polygon = area_2
+		sr_reprojection_text = 'PROJCS["LAEA_REPROJECTION_EQ_AREA",'+str(geogr_sr_reprojection_text)+',PROJECTION["Lambert_Azimuthal_Equal_Area"],PARAMETER["False_Easting",0.0],PARAMETER["False_Northing",0.0],PARAMETER["central_meridian",' + str(projection_center_X) + '],PARAMETER["latitude_of_origin",' + str(projection_center_Y) + '],UNIT["Meter",1.0]]'
+		sr_reprojection = osr.SpatialReference(sr_reprojection_text)
 		
-		#################################
-		#	Step 2: READ VERTICES		#
-		#################################
+		""" Define reprojections. """
 		
-		""" Get each linear ring in the area polygon (polygon outlines or splitted polygon parts when polygon has holes) and buffer outlines. 
-		Holes are not present anymore. """
+		geogr_to_geogr_reprojection = osr.CoordinateTransformation(geogr_sr, geogr_sr_reprojection)
+		geogr_to_proj_reprojection = osr.CoordinateTransformation(geogr_sr, sr_reprojection)
+		proj_reprojection_to_geogr_reprojection = osr.CoordinateTransformation(sr_reprojection, geogr_sr_reprojection)
+		geogr_reprojection_to_proj_reprojection = osr.CoordinateTransformation(geogr_sr_reprojection, sr_reprojection)
+		proj_reprojection_to_geogr = osr.CoordinateTransformation(sr_reprojection, geogr_sr)
+		geogr_reprojection_to_geogr = osr.CoordinateTransformation(geogr_sr_reprojection, geogr_sr)
+		geogr_reprojection_to_eq_area = osr.CoordinateTransformation(geogr_sr_reprojection, sr_eq_area_reprojection)
+		eq_area_proj_to_proj = osr.CoordinateTransformation(sr_eq_area_reprojection, sr)
+		geogr_to_eq_area = osr.CoordinateTransformation(geogr_sr, sr_eq_area_reprojection)
+		sr_to_eq_area = osr.CoordinateTransformation(sr, sr_eq_area_reprojection)
 		
-		for linear_ring in area_polygon:
-			vertices_angle_list[linear_ring_count] = []
-			
-			""" area_polygon is MULTIPOLYGON when polygon with holes (splitted polygon) is present. area_polygon is LINEARRING when no holes 
-			are present (no splitted polygon). Using GetGeometryRef(0) we get the linear ring from the polygon when splitting was conducted. """
-			
-			if linear_ring.GetGeometryName() == "LINEARRING":
-				linear_ring = linear_ring
-			else:
-				linear_ring = linear_ring.GetGeometryRef(0)
-			
-			no_of_polygon_vertices = linear_ring.GetPointCount()
-			
-			""" Get Buffer Points for outer polygon boundary. """
-	
-			for vertex in xrange(no_of_polygon_vertices):
-				current_vertex_X, current_vertex_Y, z = linear_ring.GetPoint(vertex)
-				
-				""" Check if polygon is closed (first and last vertex share same coordinates). If not, change neighboring vertices accordingly. """
-				
-				if linear_ring.GetPoint(0) == linear_ring.GetPoint(no_of_polygon_vertices - 1):
-					if vertex == 0:
-						vertex_position = "first"
-						previous_vertex_X, previous_vertex_Y, z = linear_ring.GetPoint(no_of_polygon_vertices - 2)
-						next_vertex_X, next_vertex_Y, z = linear_ring.GetPoint(vertex + 1)
-					if vertex == no_of_polygon_vertices - 1:
-						vertex_position = "last"
-						previous_vertex_X, previous_vertex_Y, z = linear_ring.GetPoint(vertex - 1)
-						next_vertex_X, next_vertex_Y, z = linear_ring.GetPoint(1)
-					if vertex > 0 and vertex < no_of_polygon_vertices - 1:
-						vertex_position = "middle" 
-						previous_vertex_X, previous_vertex_Y, z = linear_ring.GetPoint(vertex - 1)
-						next_vertex_X, next_vertex_Y, z = linear_ring.GetPoint(vertex + 1)
-				else:
-					if vertex == 0:
-						vertex_position = "first"
-						previous_vertex_X, previous_vertex_Y, z = linear_ring.GetPoint(no_of_polygon_vertices - 1)
-						next_vertex_X, next_vertex_Y, z = linear_ring.GetPoint(vertex + 1)
-					if vertex == no_of_polygon_vertices - 1:
-						vertex_position = "last"
-						previous_vertex_X, previous_vertex_Y, z = linear_ring.GetPoint(vertex - 1)
-						next_vertex_X, next_vertex_Y, z = linear_ring.GetPoint(0)
-					if vertex > 0 and vertex < no_of_polygon_vertices - 1:
-						vertex_position = "middle" 
-						previous_vertex_X, previous_vertex_Y, z = linear_ring.GetPoint(vertex - 1)
-						next_vertex_X, next_vertex_Y, z = linear_ring.GetPoint(vertex + 1)
-				
-				""" Calculate angle between previous vertex - current vertex and current vertex - next vertex from vincenty's inverse formula 
-				(calculation on a spheroid). """
-				
-				inverse_vincenty(flattening, major_axis, previous_vertex_Y, previous_vertex_X, current_vertex_Y, current_vertex_X )
-				angle_prev = direction12
-				
-				inverse_vincenty(flattening, major_axis, current_vertex_Y, current_vertex_X, next_vertex_Y, next_vertex_X )
-				angle_next = direction12
-				
-				""" Ensure that angles remain within 0-360 deg range. """
-				
-				if angle_prev < 0:
-					angle_prev = angle_prev + 360
-				if angle_next < 0:
-					angle_next = angle_next + 360
-				
-				angle_prev_BP = angle_prev - 90 
-				angle_next_BP = angle_next - 90 
-				
-				""" Ensure that buffer points are perpendicular to reference area and remain within 0-360 deg range. """
-				
-				if angle_prev_BP < 0:
-					angle_prev_BP = angle_prev_BP + 360  
-				if angle_next_BP < 0:
-					angle_next_BP = angle_next_BP + 360 
-				
-				""" Add to list in which coordinates and angles for buffer vertices calculation are stored. """
-				
-				vertices_angle_list[linear_ring_count].append([current_vertex_X, current_vertex_Y, angle_prev_BP, angle_prev, angle_next])
-				
-				""" Remember coordinates of the buffer polygon's first vertex - used later to close polygon. """
-				
-				if vertex == 0:
-					X_0 = current_vertex_X
-					Y_0 = current_vertex_Y
-					angle_0 = angle_prev_BP
-					angle_prev_0 = angle_prev
-					angle_next_0 = angle_next
-				
-				""" Calculate buffer points between angle_prev-90 and angle_next-90 (used for round buffer edges). """
-				
-				if angle_next_BP > angle_prev_BP:
-					if (angle_next_BP) - (angle_prev_BP) <= 180:
-						
-						""" Angles between previous and next buffer point - generate buffer points which are outside the original polygon. """
-						
-						angles = numpy.arange(angle_prev_BP, angle_next_BP, 8)
-						for angle in angles:
-							vertices_angle_list[linear_ring_count].append([current_vertex_X, current_vertex_Y, angle, angle_prev, angle_next])
-					if (angle_next_BP) - (angle_prev_BP) > 180:
-						
-						""" Scissor intersection: angles between next buffer point and 360 degrees and between 0 degrees and previous buffer point - generate buffer points which are outside the original polygon. """
-						
-						angles = numpy.arange(angle_next_BP, 360, 8)
-						for angle in angles:
-							vertices_angle_list[linear_ring_count].append([current_vertex_X, current_vertex_Y, angle, angle_prev, angle_next])
-						angles = numpy.arange(0, angle_prev_BP, 8)
-						for angle in angles:
-							vertices_angle_list[linear_ring_count].append([current_vertex_X, current_vertex_Y, angle, angle_prev, angle_next])
-				
-				if angle_next_BP < angle_prev_BP:
-					if angle_next_BP - angle_prev_BP > -180:
-						
-						""" Angles between next and previous buffer point - generate buffer points which are outside the original polygon. """
-						
-						angles = numpy.arange(angle_next_BP, angle_prev_BP, 8)
-						for angle in angles:
-							vertices_angle_list[linear_ring_count].append([current_vertex_X, current_vertex_Y, angle, angle_prev, angle_next])
-					if angle_next_BP - angle_prev_BP <= -180:
-						
-						""" Scissor intersection - angles between previous buffer point and 360 degrees and between 0 degrees and next buffer point - generate buffer points which are outside the original polygon. """
-						
-						angles = numpy.arange(angle_prev_BP, 360, 8)
-						for angle in angles:
-							vertices_angle_list[linear_ring_count].append([current_vertex_X, current_vertex_Y, angle, angle_prev, angle_next])
-						angles = numpy.arange(0, angle_next_BP, 8)
-						for angle in angles:
-							vertices_angle_list[linear_ring_count].append([current_vertex_X, current_vertex_Y, angle, angle_prev, angle_next])
-				vertices_angle_list[linear_ring_count].append([current_vertex_X, current_vertex_Y, angle_next_BP, angle_prev, angle_next])
-				
-			""" Close polygon using the first vertex. """
-			
-			vertices_angle_list[linear_ring_count].append([X_0, Y_0, angle_0, angle_prev_0, angle_next_0])
-			
-			linear_ring_count += 1
+		""" Reproject input data to new geographic projection in order to avoid problems during dateline intersections. """
 		
-		""" Special case: If only one research area with hole(s) is investigated, iteration in union_polygon would not consider polygon1, polygon2, 
-		polygon3, etc., but ring1, ring2, ring3, etc. As the inner ring is already considered during iteration (because it is assumed that in 'for area in union_polygon' 
-		area is a research area and not a linear ring), the function has to be stopped here. Otherwise, every further iteration in union polygon would consider 
-		the linear rings which have already been considered in the function. This would lead to too many resulting polygons (rings*no_of_craters and not no_of_craters). """
+		union_polygon.Transform(geogr_to_proj_reprojection)
+		union_polygon.Transform(proj_reprojection_to_geogr_reprojection)
 		
-		if len(Area_IDs) == 1 and number_of_holes >= 1:
-			break
-		
-	#################################
-	#	Step 3: BUFFER POLYGON		#
-	#################################
-	
-	""" Iterate crater features """
-	
-	cr_cnt = 0
-	for crater in all_craters:
-		
-		if len(all_craters) > 0:
-			print "Process", process_count, ": Processing crater", crater[0], ":", round(((float(cr_cnt) / float(len(all_craters)))*100), 1), "%"
-		
-		""" Detailled logfile is only written in single-core mode """
-		
+		print "Buffering Area Polygons (", len(all_craters), ")..."
 		if write_logfile == True and multicore_operation == False:
-			logfile.write("Process " + str(process_count) +  ": Processing crater " + str(crater[0]) + ": " + str(round(((float(cr_cnt) / float(len(all_craters)))*100), 1)) + " %\n")
 			logfile.flush()
+		if write_logfile == True and multicore_operation == True:
+			multicore_log.append(["Buffering Area Polygons ( " + str(len(all_craters)) + " )..."])
+			
+		st = time.time()
 		
-		""" Define geometries. """
+		counter = 0
+		linear_ring_count = 0
+		vertices_angle_list = dict()
 		
-		BCC_union_polygon = ogr.Geometry(ogr.wkbPolygon)
-		point_geometry = ogr.Geometry(ogr.wkbPoint)
+		for area in union_polygon:
+			
+			number_of_inner_polygons = 0
+			number_of_holes = 0
+			
+			#############################
+			#	Step 1: CUT POLYGON		#
+			#############################
+			
+			""" Determine number of polygons and number of holes to correctly split and buffer the data. """
+			
+			if area.GetGeometryName() == "LINEARRING":
+				area_polygon = ogr.Geometry(ogr.wkbPolygon)
+				area_polygon.AddGeometry(area)
+			else:
+				area_polygon = ogr.Geometry(ogr.wkbPolygon)
+				area_polygon.AddGeometry(area.GetGeometryRef(0)) 
+			
+			if area.GetGeometryName() == "LINEARRING":
+				number_of_holes = union_polygon.GetGeometryCount() - 1
+				#print "There is one inner polygon and", number_of_holes, "holes in this polygon."
+				
+			if area.GetGeometryName() == "POLYGON":
+				number_of_inner_polygons = union_polygon.GetGeometryCount()
+				number_of_holes = area.GetGeometryCount() - 1 # When union_polygon becomes MULTIPOLYGON due to clip and buffer (formation of islands) 
+				#print "There are", number_of_inner_polygons, "inner polygons and", area.GetGeometryCount() - 1, "holes in this polygon."
+			
+			""" Get inner rings: Get centroid of hole and split union_polygon or area into multiple parts according to holes. This way, only outlines need to be buffered (buffering 
+			outlines is faster than buffering an inner ring). """
+			
+			if number_of_holes > 0:
+				if area.GetGeometryName() == "LINEARRING":
+					union_polygon_2 = ogr.CreateGeometryFromWkt(union_polygon.ExportToWkt())
+				if area.GetGeometryName() == "POLYGON":
+					area_2 = ogr.CreateGeometryFromWkt(area.ExportToWkt())
+				
+				for hole_count in range(number_of_holes):
+					if number_of_inner_polygons == 0:
+						inner_ring_geometry = union_polygon.GetGeometryRef(hole_count + 1)
+					if number_of_inner_polygons > 0:
+						inner_ring_geometry = area.GetGeometryRef(hole_count + 1)
+					
+					""" Get center of inner ring. Inner ring geometry has to be transformed from LINEARRING to POLYGON geometry. """
+					
+					inner_ring_polygon_geometry = ogr.Geometry(ogr.wkbPolygon)
+					inner_ring_polygon_geometry.AddGeometry(inner_ring_geometry)
+					
+					inner_ring_centroid = inner_ring_polygon_geometry.Centroid()
+					inner_ring_centroid_X, inner_ring_centroid_Y, inner_ring_centroid_Z = inner_ring_centroid.GetPoint()
+					
+					""" Generate lines which intersect centroid of inner rings.  """
+					
+					cut_line = ogr.Geometry(ogr.wkbLineString)
+					cut_line.AddPoint(0, 90)
+					cut_line.AddPoint(inner_ring_centroid_X, inner_ring_centroid_Y)
+					cut_line.AddPoint(0, -90)
+					cut_line.Segmentize(1)
+					
+					""" Generate splitted area from reference area and (buffered) split lines. OGR doesn't support polygon splitting 
+					by lines. """
+					
+					buffered_cut_line = cut_line.Buffer(0.00000000001) 
+					if area.GetGeometryName() == "LINEARRING":
+						union_polygon_2 = union_polygon_2.Difference(buffered_cut_line)
+						area_polygon = union_polygon_2
+					if area.GetGeometryName() == "POLYGON":
+						area_2 = area_2.Difference(buffered_cut_line)
+						area_polygon = area_2
+			
+			#################################
+			#	Step 2: READ VERTICES		#
+			#################################
+			
+			""" Get each linear ring in the area polygon (polygon outlines or splitted polygon parts when polygon has holes) and buffer outlines. 
+			Holes are not present anymore. """
+			
+			for linear_ring in area_polygon:
+				vertices_angle_list[linear_ring_count] = []
+				
+				""" area_polygon is MULTIPOLYGON when polygon with holes (splitted polygon) is present. area_polygon is LINEARRING when no holes 
+				are present (no splitted polygon). Using GetGeometryRef(0) we get the linear ring from the polygon when splitting was conducted. """
+				
+				if linear_ring.GetGeometryName() == "LINEARRING":
+					linear_ring = linear_ring
+				else:
+					linear_ring = linear_ring.GetGeometryRef(0)
+				
+				no_of_polygon_vertices = linear_ring.GetPointCount()
+				
+				""" Get Buffer Points for outer polygon boundary. """
+		
+				for vertex in xrange(no_of_polygon_vertices):
+					current_vertex_X, current_vertex_Y, z = linear_ring.GetPoint(vertex)
+					
+					""" Check if polygon is closed (first and last vertex share same coordinates). If not, change neighboring vertices accordingly. """
+					
+					if linear_ring.GetPoint(0) == linear_ring.GetPoint(no_of_polygon_vertices - 1):
+						if vertex == 0:
+							vertex_position = "first"
+							previous_vertex_X, previous_vertex_Y, z = linear_ring.GetPoint(no_of_polygon_vertices - 2)
+							next_vertex_X, next_vertex_Y, z = linear_ring.GetPoint(vertex + 1)
+						if vertex == no_of_polygon_vertices - 1:
+							vertex_position = "last"
+							previous_vertex_X, previous_vertex_Y, z = linear_ring.GetPoint(vertex - 1)
+							next_vertex_X, next_vertex_Y, z = linear_ring.GetPoint(1)
+						if vertex > 0 and vertex < no_of_polygon_vertices - 1:
+							vertex_position = "middle" 
+							previous_vertex_X, previous_vertex_Y, z = linear_ring.GetPoint(vertex - 1)
+							next_vertex_X, next_vertex_Y, z = linear_ring.GetPoint(vertex + 1)
+					else:
+						if vertex == 0:
+							vertex_position = "first"
+							previous_vertex_X, previous_vertex_Y, z = linear_ring.GetPoint(no_of_polygon_vertices - 1)
+							next_vertex_X, next_vertex_Y, z = linear_ring.GetPoint(vertex + 1)
+						if vertex == no_of_polygon_vertices - 1:
+							vertex_position = "last"
+							previous_vertex_X, previous_vertex_Y, z = linear_ring.GetPoint(vertex - 1)
+							next_vertex_X, next_vertex_Y, z = linear_ring.GetPoint(0)
+						if vertex > 0 and vertex < no_of_polygon_vertices - 1:
+							vertex_position = "middle" 
+							previous_vertex_X, previous_vertex_Y, z = linear_ring.GetPoint(vertex - 1)
+							next_vertex_X, next_vertex_Y, z = linear_ring.GetPoint(vertex + 1)
+					
+					""" Calculate angle between previous vertex - current vertex and current vertex - next vertex from vincenty's inverse formula 
+					(calculation on a spheroid). """
+					
+					inverse_vincenty(flattening, major_axis, previous_vertex_Y, previous_vertex_X, current_vertex_Y, current_vertex_X )
+					angle_prev = direction12
+					
+					inverse_vincenty(flattening, major_axis, current_vertex_Y, current_vertex_X, next_vertex_Y, next_vertex_X )
+					angle_next = direction12
+					
+					""" Ensure that angles remain within 0-360 deg range. """
+					
+					if angle_prev < 0:
+						angle_prev = angle_prev + 360
+					if angle_next < 0:
+						angle_next = angle_next + 360
+					
+					angle_prev_BP = angle_prev - 90 
+					angle_next_BP = angle_next - 90 
+					
+					""" Ensure that buffer points are perpendicular to reference area and remain within 0-360 deg range. """
+					
+					if angle_prev_BP < 0:
+						angle_prev_BP = angle_prev_BP + 360  
+					if angle_next_BP < 0:
+						angle_next_BP = angle_next_BP + 360 
+					
+					""" Add to list in which coordinates and angles for buffer vertices calculation are stored. """
+					
+					vertices_angle_list[linear_ring_count].append([current_vertex_X, current_vertex_Y, angle_prev_BP, angle_prev, angle_next])
+					
+					""" Remember coordinates of the buffer polygon's first vertex - used later to close polygon. """
+					
+					if vertex == 0:
+						X_0 = current_vertex_X
+						Y_0 = current_vertex_Y
+						angle_0 = angle_prev_BP
+						angle_prev_0 = angle_prev
+						angle_next_0 = angle_next
+					
+					""" Calculate buffer points between angle_prev-90 and angle_next-90 (used for round buffer edges). """
+					
+					if angle_next_BP > angle_prev_BP:
+						if (angle_next_BP) - (angle_prev_BP) <= 180:
+							
+							""" Angles between previous and next buffer point - generate buffer points which are outside the original polygon. """
+							
+							angles = numpy.arange(angle_prev_BP, angle_next_BP, 8)
+							for angle in angles:
+								vertices_angle_list[linear_ring_count].append([current_vertex_X, current_vertex_Y, angle, angle_prev, angle_next])
+						if (angle_next_BP) - (angle_prev_BP) > 180:
+							
+							""" Scissor intersection: angles between next buffer point and 360 degrees and between 0 degrees and previous buffer point - generate buffer points which are outside the original polygon. """
+							
+							angles = numpy.arange(angle_next_BP, 360, 8)
+							for angle in angles:
+								vertices_angle_list[linear_ring_count].append([current_vertex_X, current_vertex_Y, angle, angle_prev, angle_next])
+							angles = numpy.arange(0, angle_prev_BP, 8)
+							for angle in angles:
+								vertices_angle_list[linear_ring_count].append([current_vertex_X, current_vertex_Y, angle, angle_prev, angle_next])
+					
+					if angle_next_BP < angle_prev_BP:
+						if angle_next_BP - angle_prev_BP > -180:
+							
+							""" Angles between next and previous buffer point - generate buffer points which are outside the original polygon. """
+							
+							angles = numpy.arange(angle_next_BP, angle_prev_BP, 8)
+							for angle in angles:
+								vertices_angle_list[linear_ring_count].append([current_vertex_X, current_vertex_Y, angle, angle_prev, angle_next])
+						if angle_next_BP - angle_prev_BP <= -180:
+							
+							""" Scissor intersection - angles between previous buffer point and 360 degrees and between 0 degrees and next buffer point - generate buffer points which are outside the original polygon. """
+							
+							angles = numpy.arange(angle_prev_BP, 360, 8)
+							for angle in angles:
+								vertices_angle_list[linear_ring_count].append([current_vertex_X, current_vertex_Y, angle, angle_prev, angle_next])
+							angles = numpy.arange(0, angle_next_BP, 8)
+							for angle in angles:
+								vertices_angle_list[linear_ring_count].append([current_vertex_X, current_vertex_Y, angle, angle_prev, angle_next])
+					vertices_angle_list[linear_ring_count].append([current_vertex_X, current_vertex_Y, angle_next_BP, angle_prev, angle_next])
+					
+				""" Close polygon using the first vertex. """
+				
+				vertices_angle_list[linear_ring_count].append([X_0, Y_0, angle_0, angle_prev_0, angle_next_0])
+				
+				linear_ring_count += 1
+			
+			""" Special case: If only one research area with hole(s) is investigated, iteration in union_polygon would not consider polygon1, polygon2, 
+			polygon3, etc., but ring1, ring2, ring3, etc. As the inner ring is already considered during iteration (because it is assumed that in 'for area in union_polygon' 
+			area is a research area and not a linear ring), the function has to be stopped here. Otherwise, every further iteration in union polygon would consider 
+			the linear rings which have already been considered in the function. This would lead to too many resulting polygons (rings*no_of_craters and not no_of_craters). """
+			
+			if len(Area_IDs) == 1 and number_of_holes >= 1:
+				break
+			
+		#################################
+		#	Step 3: BUFFER POLYGON		#
+		#################################
+		
+		""" Iterate crater features """
+		
+		cr_cnt = 0
+		for crater in all_craters:
+			
+			if len(all_craters) > 0:
+				print "Process", process_count, ": Processing crater", crater[0], ":", round(((float(cr_cnt) / float(len(all_craters)))*100), 1), "%"
+								
+			if write_logfile == True and multicore_operation == False:
+				logfile.flush()
+			if write_logfile == True and multicore_operation == True:
+				multicore_log.append(["Process " + str(process_count) + " : Processing crater " + str(crater[0]) + " : " + str (round(((float(cr_cnt) / float(len(all_craters)))*100), 1)) + " %"])
+			
+			""" Define geometries. """
+			
+			BCC_union_polygon = ogr.Geometry(ogr.wkbPolygon)
+			point_geometry = ogr.Geometry(ogr.wkbPoint)
+		
+			if generate_point_file == True:
+				point_featureDefn = layer_points.GetLayerDefn()
+				point_feature = ogr.Feature(point_featureDefn)
+				point_feature.SetGeometry(point_geometry)
+				
+			if generate_polygon_file == True:
+				polygon_featureDefn = layer_polygon.GetLayerDefn()
+				polygon_feature = ogr.Feature(polygon_featureDefn)
+				polygon_feature.SetGeometry(BCC_union_polygon)
+				
+			""" Get buffer distance """
+			
+			dist_buffer = crater[1]*1000/2
+			
+			""" Calculate coordinates of buffer points for outer polygon """
+			
+			geometry_dict_count = 0
+			len_vertices_angle_list = len(vertices_angle_list)
+			
+			for geometry_dict_count in range(len_vertices_angle_list):
+				
+				splitted_buffered_ring = ogr.Geometry(ogr.wkbLinearRing)
+				splitted_buffered_polygon = ogr.Geometry(ogr.wkbPolygon)
+				
+				direct_vincenty(flattening, major_axis, vertices_angle_list[geometry_dict_count], dist_buffer, bufferfactor)
+				
+				for buffer_vertex in buffer_vertices_list:
+					
+					""" Add point to ring geometry """
+					
+					splitted_buffered_ring.AddPoint(buffer_vertex[0], buffer_vertex[1])
+					
+					if generate_point_file == True:
+						
+						point_geometry.AddPoint(buffer_vertex[0], buffer_vertex[1])
+						point_geometry.Transform(geogr_reprojection_to_proj_reprojection)
+						point_geometry.Transform(proj_reprojection_to_geogr)
+						point_feature.SetGeometry(point_geometry)
+						point_feature.SetField('prev', buffer_vertex[2])
+						point_feature.SetField('next', buffer_vertex[3])
+						point_feature.SetField('angle', angle_prev_BP)
+						layer_points.CreateFeature(point_feature)
+				
+				""" Add ring to polygon geometry """
+				
+				splitted_buffered_polygon.AddGeometry(splitted_buffered_ring)
+				
+				""" eliminate unwanted holes due to self-intersections on outer boundary using a planar 0 buffer """
+				
+				splitted_buffered_polygon = splitted_buffered_polygon.Buffer(0)
+				
+				""" Errors may occur during Buffer(0) so that two polygons are formed from one polygon due to severe self-intersections. 
+				This would lead to an invalid geometry which could not be added to the BNSC_union_polygon. To prevent this, all geometries 
+				in the splitted_buffered_polygon are investigated, Buffered (0) again and then added to the BNSC_union_polygon. """
+				
+				if splitted_buffered_polygon.IsValid() == False:
+				
+					for linear_ring_splitted_buffered_polygon in splitted_buffered_polygon:
+						
+						""" Add linear_ring_splitted_buffered_polygon to new polygon. """
+						
+						polygon_part_splitted_buffered_polygon = ogr.Geometry(ogr.wkbPolygon)
+						polygon_part_splitted_buffered_polygon.AddGeometry(linear_ring_splitted_buffered_polygon)
+						polygon_part_splitted_buffered_polygon = polygon_part_splitted_buffered_polygon.Buffer(0)
+						
+						if polygon_part_splitted_buffered_polygon.IsValid() == False:
+							print "Error due to severe self-intersection during buffering. Please use shapefile output and check the modified shapefile for errors."
+							ctypes.windll.user32.MessageBoxA(0, "Error due to severe self-intersection during buffering.", "Error", 0)
+							if write_logfile == True and multicore_operation == False:
+								logfile.flush()
+							if write_logfile == True and multicore_operation == True:
+								multicore_log.append(["Error due to severe self-intersection during buffering. Please use shapefile output and check the modified shapefile for errors."])
+								#multicore_log.append(["\nCSFD measurement failed due to severe exception: \n" + str(gdal.GetLastErrorMsg()) + "\nScript canceled!"])
+								#multicore_log_out_q.put(multicore_log)
+								#ctypes.windll.user32.MessageBoxA(0, "CSFD measurement failed due to severe exception. Please check modified shapefile geometries and logfile.", "Error", 0)
+								#return
+								raise Exception("Self-intersection")
+						
+						BCC_union_polygon = BCC_union_polygon.Union(polygon_part_splitted_buffered_polygon)
+				
+				if splitted_buffered_polygon.IsValid() == True:
+					
+					BCC_union_polygon = BCC_union_polygon.Union(splitted_buffered_polygon)
+				
+				geometry_dict_count += 1
+			
+			BCC_union_polygon.Transform(geogr_reprojection_to_proj_reprojection)
+			BCC_union_polygon.Transform(proj_reprojection_to_geogr)
+			BCC_union_polygon.Transform(geogr_to_eq_area)
+			
+			geodesic_area = BCC_union_polygon.GetArea()/1000000
+			
+			if generate_polygon_file == True:
+				
+				""" Project back to original spatial reference. """
+				
+				BCC_union_polygon.Transform(eq_area_proj_to_proj) 
+				polygon_feature.SetGeometry(BCC_union_polygon) 
+				polygon_feature.SetField('Crater_ID', crater[0])
+				polygon_feature.SetField('Size_sq_km', geodesic_area)
+				polygon_feature.SetField('Buffer_m', dist_buffer * bufferfactor)
+				layer_polygon.CreateFeature(polygon_feature)
+				polygon_features_pass.append(polygon_feature)
+			
+			ejecta_diam = crater[1] * bufferfactor
+			crater_area_list.append([crater[1], crater[2], crater[3], ejecta_diam, geodesic_area])
+			
+			""" Delete geometries """
+			
+			del splitted_buffered_ring
+			del splitted_buffered_polygon
+			del BCC_union_polygon
+			del point_geometry
+			if generate_point_file == True:
+				del point_feature
+			if generate_polygon_file == True:
+				del polygon_feature
+			
+			cr_cnt += 1
+			counter += 1
+			
+			""" Write status information """
+			
+			current_status_percent = round(((float(cr_cnt) / float(len(all_craters)))*100), 2)
+			
+			if multicore_operation == True:
+				current_status = [process_count, current_status_percent]
+				status_out_q.put(current_status)
+				
+			if multicore_operation == False:
+				results_percent = current_status_percent
+				self.update_process_label("Process 2/2 Modifying reference areas... " + str(results_percent) +"%")
+				QApplication.processEvents()
+		
+		crater_area_out_q.put(crater_area_list)
+		
+		""" Indicator when multicore operation is finished """
+		
+		if multicore_operation == True:
+			status_out_q.put(9999999999)
+		
+		""" Logfile """
+		
+		if write_logfile == True and multicore_operation == True:
+			multicore_log_out_q.put(multicore_log)
 	
-		if generate_point_file == True:
-			point_featureDefn = layer_points.GetLayerDefn()
-			point_feature = ogr.Feature(point_featureDefn)
-			point_feature.SetGeometry(point_geometry)
-			
-		if generate_polygon_file == True:
-			polygon_featureDefn = layer_polygon.GetLayerDefn()
-			polygon_feature = ogr.Feature(polygon_featureDefn)
-			polygon_feature.SetGeometry(BCC_union_polygon)
-			
-		""" Get buffer distance """
-		
-		dist_buffer = crater[1]*1000/2
-		
-		""" Calculate coordinates of buffer points for outer polygon """
-		
-		geometry_dict_count = 0
-		len_vertices_angle_list = len(vertices_angle_list)
-		
-		for geometry_dict_count in range(len_vertices_angle_list):
-			
-			splitted_buffered_ring = ogr.Geometry(ogr.wkbLinearRing)
-			splitted_buffered_polygon = ogr.Geometry(ogr.wkbPolygon)
-			
-			direct_vincenty(flattening, major_axis, vertices_angle_list[geometry_dict_count], dist_buffer, bufferfactor)
-			
-			for buffer_vertex in buffer_vertices_list:
-				
-				""" Add point to ring geometry """
-				
-				splitted_buffered_ring.AddPoint(buffer_vertex[0], buffer_vertex[1])
-				
-				if generate_point_file == True:
-					
-					point_geometry.AddPoint(buffer_vertex[0], buffer_vertex[1])
-					point_geometry.Transform(geogr_reprojection_to_proj_reprojection)
-					point_geometry.Transform(proj_reprojection_to_geogr)
-					point_feature.SetGeometry(point_geometry)
-					point_feature.SetField('prev', buffer_vertex[2])
-					point_feature.SetField('next', buffer_vertex[3])
-					point_feature.SetField('angle', angle_prev_BP)
-					layer_points.CreateFeature(point_feature)
-			
-			""" Add ring to polygon geometry """
-			
-			splitted_buffered_polygon.AddGeometry(splitted_buffered_ring)
-			
-			""" eliminate unwanted holes due to self-intersections on outer boundary using a planar 0 buffer """
-			
-			splitted_buffered_polygon = splitted_buffered_polygon.Buffer(0)
-			
-			""" Errors may occur during Buffer(0) so that two polygons are formed from one polygon due to severe self-intersections. 
-			This would lead to an invalid geometry which could not be added to the BNSC_union_polygon. To prevent this, all geometries 
-			in the splitted_buffered_polygon are investigated, Buffered (0) again and then added to the BNSC_union_polygon. """
-			
-			if splitted_buffered_polygon.IsValid() == False:
-			
-				for linear_ring_splitted_buffered_polygon in splitted_buffered_polygon:
-					
-					""" Add linear_ring_splitted_buffered_polygon to new polygon. """
-					
-					polygon_part_splitted_buffered_polygon = ogr.Geometry(ogr.wkbPolygon)
-					polygon_part_splitted_buffered_polygon.AddGeometry(linear_ring_splitted_buffered_polygon)
-					polygon_part_splitted_buffered_polygon = polygon_part_splitted_buffered_polygon.Buffer(0)
-					
-					if polygon_part_splitted_buffered_polygon.IsValid() == False:
-						print "Error due to severe self-intersection during buffering. Please generate and check the output shapefile for errors."
-						if write_logfile == True and multicore_operation == False:
-							logfile.write("Error due to severe self-intersection during buffering. Please generate and check the output shapefile for errors.")
-							logfile.flush()
-						exit()
-					
-					BCC_union_polygon = BCC_union_polygon.Union(polygon_part_splitted_buffered_polygon)
-			
-			if splitted_buffered_polygon.IsValid() == True:
-				
-				BCC_union_polygon = BCC_union_polygon.Union(splitted_buffered_polygon)
-			
-			geometry_dict_count += 1
-		
-		BCC_union_polygon.Transform(geogr_reprojection_to_proj_reprojection)
-		BCC_union_polygon.Transform(proj_reprojection_to_geogr)
-		BCC_union_polygon.Transform(geogr_to_eq_area)
-		
-		geodesic_area = BCC_union_polygon.GetArea()/1000000
-		
-		if generate_polygon_file == True:
-			
-			""" Project back to original spatial reference. """
-			
-			BCC_union_polygon.Transform(eq_area_proj_to_proj) 
-			polygon_feature.SetGeometry(BCC_union_polygon) 
-			polygon_feature.SetField('Crater_ID', crater[0])
-			polygon_feature.SetField('Size_sq_km', geodesic_area)
-			polygon_feature.SetField('Buffer_m', dist_buffer * bufferfactor)
-			layer_polygon.CreateFeature(polygon_feature)
-			polygon_features_pass.append(polygon_feature)
-		
-		ejecta_diam = crater[1] * bufferfactor
-		crater_area_list.append([crater[1], crater[2], crater[3], ejecta_diam, geodesic_area])
-		
-		""" Delete geometries """
-		
-		del splitted_buffered_ring
-		del splitted_buffered_polygon
-		del BCC_union_polygon
-		del point_geometry
-		if generate_point_file == True:
-			del point_feature
-		if generate_polygon_file == True:
-			del polygon_feature
-		
-		cr_cnt += 1
-		counter += 1
-	
-	crater_area_out_q.put(crater_area_list)
+	except Exception, e:
+		print "\nCSFD measurement failed due to severe exception: \n" + str(e) + "\n" + str(gdal.GetLastErrorMsg()) + "\nScript canceled!"
+		ctypes.windll.user32.MessageBoxA(0, "CSFD measurement failed due to severe exception. Please check modified shapefile geometries and logfile.", "Error", 0)
+		if write_logfile == True and multicore_operation == True:
+			multicore_log.append(["\nCSFD measurement failed due to severe exception: \n" + str(e) + "\n" + str(gdal.GetLastErrorMsg()) + "\nScript canceled!"])
+			multicore_log_out_q.put(multicore_log)
+		return #PROBLEM IM MC BEI RETURN! - RICHTIG BEHINDERT - KANN ICH ALLES BEENDEN WENN HIER WAS SCHIEF LAEUFT?
 	
 	""" Buffer craters to define the size of ejecta blankets. """
 	
 def NSC_BNSC_buffer_craters(buffered_craters_out_q, craters_for_counting_list, flattening, major_axis, sr_wkt, lock, bufferfactor_crater):
 	global buffered_craters_wkt_list
 	
-	""" Convert spatial reference from wkt to spatial reference type (during multiprocessing). Also, Transformations etc. need to be defined as Spatial reference data type can't
-	be handed to function during multiprocessing. """
-	
-	if isinstance(sr_wkt, basestring) == True:
-		sr = osr.SpatialReference()
-		sr.ImportFromWkt(sr_wkt)
+	try:
+			
+		""" Convert spatial reference from wkt to spatial reference type (during multiprocessing). Also, Transformations etc. need to be defined as Spatial reference data type can't
+		be handed to function during multiprocessing. """
 		
-	if isinstance(sr_wkt, basestring) == False:
-		sr = sr_wkt
-	
-	""" Get geographic reference system. """
-	
-	if sr.IsProjected():
-		geogr_sr = sr.CloneGeogCS()
-	if sr.IsGeographic():
-		geogr_sr = sr
-	
-	buffered_craters_wkt_list = []
-	
-	""" Create list of angles used for polar coordinates (equivalent to the number of geodesic buffer polygon's vertices). """
-	
-	no_of_buffer_vertices = 180.0
-	divisor = 360.0/no_of_buffer_vertices
-	ejecta_angles = numpy.arange(0.0, 360.0, divisor)
-	ejecta_angles = numpy.append(ejecta_angles, 0.0)
-	
-	""" Get crater information """
-	
-	for crater in craters_for_counting_list:
+		if isinstance(sr_wkt, basestring) == True:
+			sr = osr.SpatialReference()
+			sr.ImportFromWkt(sr_wkt)
+			
+		if isinstance(sr_wkt, basestring) == False:
+			sr = sr_wkt
 		
-		vertices_angle_list = []
+		""" Get geographic reference system. """
 		
-		crater_id = crater[0]
-		crater_diameter = crater[1]
-		crater_centroid_X = crater[2]
-		crater_centroid_Y = crater[3]
-		distance_crater_polygon = crater[4]
+		if sr.IsProjected():
+			geogr_sr = sr.CloneGeogCS()
+		if sr.IsGeographic():
+			geogr_sr = sr
 		
-		""" Check if crater obliterates larger crater from previously added field. """
+		buffered_craters_wkt_list = []
 		
-		if len(crater) == 6:
-			obliterates = "obliterates"
-		if len(crater) == 5:
-			obliterates = "included"
+		""" Create list of angles used for polar coordinates (equivalent to the number of geodesic buffer polygon's vertices). """
 		
-		""" Determine buffer distance in meter """
+		no_of_buffer_vertices = 180.0
+		divisor = 360.0/no_of_buffer_vertices
+		ejecta_angles = numpy.arange(0.0, 360.0, divisor)
+		ejecta_angles = numpy.append(ejecta_angles, 0.0)
 		
-		dist_buffer = ((crater_diameter * 1000) / 2) + ((crater_diameter * 1000)/2 * (bufferfactor_crater - 1))
+		""" Get crater information """
 		
-		""" Calculate vertices of buffered crater polygon """
+		for crater in craters_for_counting_list:
+			
+			vertices_angle_list = []
+			
+			crater_id = crater[0]
+			crater_diameter = crater[1]
+			crater_centroid_X = crater[2]
+			crater_centroid_Y = crater[3]
+			distance_crater_polygon = crater[4]
+			
+			""" Check if crater obliterates larger crater from previously added field. """
+			
+			if len(crater) == 6:
+				obliterates = "obliterates"
+			if len(crater) == 5:
+				obliterates = "included"
+			
+			""" Determine buffer distance in meter """
+			
+			dist_buffer = ((crater_diameter * 1000) / 2) + ((crater_diameter * 1000)/2 * (bufferfactor_crater - 1))
+			
+			""" Calculate vertices of buffered crater polygon """
+			
+			for ejecta_angle in ejecta_angles:
+				vertices_angle_list.append([crater_centroid_X, crater_centroid_Y, ejecta_angle, 0, 0])
+			
+			""" bufferfactor_crater = 1 in this case since buffer distance has already been determined in this function """
+			
+			direct_vincenty(flattening, major_axis, vertices_angle_list, dist_buffer, 1) 
+			
+			""" Define buffered crater polygon """
+			
+			crater_ring_geometry = ogr.Geometry(ogr.wkbLinearRing)
+			crater_polygon_geometry = ogr.Geometry(ogr.wkbPolygon)
+			
+			crater_ring_geometry.AssignSpatialReference(geogr_sr)
+			crater_polygon_geometry.AssignSpatialReference(geogr_sr)
+			
+			""" Create buffered crater polygon """
+			
+			for crater_buffer_vertex in buffer_vertices_list:
+				crater_ring_geometry.AddPoint(crater_buffer_vertex[0], crater_buffer_vertex[1])
+			
+			crater_polygon_geometry.AddGeometry(crater_ring_geometry)
+			
+			""" Convert polygon to WKT to pass it to other functions. Multicore doesn't support GDAL objects to pass. Text is OK. """
+			
+			buffered_craters_wkt_list.append([crater_polygon_geometry.ExportToWkt(), distance_crater_polygon, crater_id, crater_diameter, obliterates])
+			
+		buffered_craters_out_q.put(buffered_craters_wkt_list)
 		
-		for ejecta_angle in ejecta_angles:
-			vertices_angle_list.append([crater_centroid_X, crater_centroid_Y, ejecta_angle, 0, 0])
-		
-		""" bufferfactor_crater = 1 in this case since buffer distance has already been determined in this function """
-		
-		direct_vincenty(flattening, major_axis, vertices_angle_list, dist_buffer, 1) 
-		
-		""" Define buffered crater polygon """
-		
-		crater_ring_geometry = ogr.Geometry(ogr.wkbLinearRing)
-		crater_polygon_geometry = ogr.Geometry(ogr.wkbPolygon)
-		
-		crater_ring_geometry.AssignSpatialReference(geogr_sr)
-		crater_polygon_geometry.AssignSpatialReference(geogr_sr)
-		
-		""" Create buffered crater polygon """
-		
-		for crater_buffer_vertex in buffer_vertices_list:
-			crater_ring_geometry.AddPoint(crater_buffer_vertex[0], crater_buffer_vertex[1])
-		
-		crater_polygon_geometry.AddGeometry(crater_ring_geometry)
-		
-		""" Convert polygon to WKT to pass it to other functions. Multicore doesn't support GDAL objects to pass. Text is OK. """
-		
-		buffered_craters_wkt_list.append([crater_polygon_geometry.ExportToWkt(), distance_crater_polygon, crater_id, crater_diameter, obliterates])
-		
-	buffered_craters_out_q.put(buffered_craters_wkt_list)
+	except Exception, e:
+		print "\nCSFD measurement failed due to severe exception: \n" + str(e) + "\n" + str(gdal.GetLastErrorMsg()) + "\nScript canceled!"
+		ctypes.windll.user32.MessageBoxA(0, "CSFD measurement failed due to severe exception. Please check modified shapefile geometries and logfile.", "Error", 0)
+		return
 
 """ Modify initial reference areas for NSC and BNSC. """
 
-def NSC_BNSC_exclude_craters(approach, buffered_craters_wkt_list, union_polygon, sr_wkt, generate_polygon_file, path_to_outfile, craters_for_counting_list, craters_for_counting_list_BNSC, multicore_operation, layer_polygon, bufferfactor, bufferfactor_crater, process_count, crater_area_out_q, flattening, major_axis, Area_IDs, write_logfile, logfile):
+def NSC_BNSC_exclude_craters(self, approach, buffered_craters_wkt_list, union_polygon, sr_wkt, generate_polygon_file, path_to_outfile, craters_for_counting_list, craters_for_counting_list_BNSC, multicore_operation, layer_polygon, bufferfactor, bufferfactor_crater, process_count, crater_area_out_q, flattening, major_axis, Area_IDs, write_logfile, logfile, status_out_q):
 	from shapely.geometry import Point
 	global crater_area_list
 	
-	crater_area_list = []
-	
-	""" Convert spatial reference from wkt to spatial reference type (during multiprocessing). Also, Transformations etc. need to be defined as Spatial reference data type can't
-	be handed to function during multiprocessing """
-	
-	if isinstance(sr_wkt, basestring) == True:
-		sr = osr.SpatialReference()
-		sr.ImportFromWkt(sr_wkt)
+	try:
+			
+		crater_area_list = []
 		
-	if isinstance(sr_wkt, basestring) == False:
-		sr = sr_wkt
-	
-	geogr_sr = sr.CloneGeogCS()
-	
-	if multicore_operation == True:
-		if generate_polygon_file == True:
-			outfile_split = os.path.split(path_to_outfile)
-			outfile_path = str(outfile_split[0]) + "\\"
-			outfile_name = str(outfile_split[1])
-			outfile_name_no_extension = os.path.splitext(outfile_name)[0]
-			
-			driver = ogr.GetDriverByName('ESRI Shapefile') 
-			polygon_data_source = driver.CreateDataSource(outfile_path + outfile_name_no_extension + "_" + str(process_count) + ".shp") 
-			
-			layer_polygon = polygon_data_source.CreateLayer('Buffer_Polygon', sr, geom_type = ogr.wkbPolygon)
-			
-			idField = ogr.FieldDefn('Size_sq_km', ogr.OFTReal)
-			layer_polygon.CreateField(idField)
-			idField = ogr.FieldDefn('crater_ID', ogr.OFTInteger)
-			layer_polygon.CreateField(idField)
-	
-	if generate_polygon_file == True:
-		polygon_featureDefn = layer_polygon.GetLayerDefn()
-		polygon_feature = ogr.Feature(polygon_featureDefn)
-	
-	buffered_craters_geometry_list = []
-	
-	""" Define coordinate reprojections: craters are in geogr sr and have to be projected to proj sr if input reference system is projected. """
-	
-	geog_to_proj = osr.CoordinateTransformation(geogr_sr, sr)
-	proj_to_geogr = osr.CoordinateTransformation(sr, geogr_sr) 
-	
-	if sr.IsProjected():
-		union_polygon_sr = union_polygon.GetSpatialReference()
-		if union_polygon_sr:
-			if union_polygon_sr.IsProjected():
-				union_polygon.Transform(proj_to_geogr)
-		if not union_polygon_sr:
-			union_polygon.Transform(proj_to_geogr)
-	
-	""" Get center of research area to define projection center. """
-	
-	union_polygon_centroid = union_polygon.Centroid()
-	union_polygon_centroid_X, union_polygon_centroid_Y, union_polygon_centroid_Z = union_polygon_centroid.GetPoint()
-	
-	projection_center_X = round(union_polygon_centroid_X, 1)
-	projection_center_Y = round(union_polygon_centroid_Y, 1)
-	
-	
-	""" If a polygon intersects a dateline, it may happen that the centroid is wrongly identified (Polygon intersects dateline vs. 
-	Polygon spans globe with a hole over dateline). If polygon cuts lines (which we assume to be datelines) at lon -179.8 and lon 179.8, we assume that a dateline 
-	intersection is present. In this case, we set the projection center to (false projection center (if closer than 80 deg lon to central meridian) + 100 deg 
-	lon). It is quite experimental to set a fixed lon value for such cases but it worked in all cases we tested. """
-	
-	dateline_1 = ogr.Geometry(ogr.wkbLineString)
-	dateline_1.AddPoint(-179, 90)
-	dateline_1.AddPoint(-179, -90)
-
-	dateline_2 = ogr.Geometry(ogr.wkbLineString)
-	dateline_2.AddPoint(179, 90)
-	dateline_2.AddPoint(179, -90)
-	
-	""" If both lines (lon +179.8 & -179.8) are intersecting the polygon, we assume a dateline intersection rather than a global polygon. """
-	
-	if union_polygon.Intersects(dateline_1) == True and union_polygon.Intersects(dateline_2) == True:
-		if projection_center_X < 80 and projection_center_X > -80:
-			projection_center_X = projection_center_X + 100
-	
-	sr_text = 'PROJCS["PROJECTED_LAMBERT_AEA",'+str(geogr_sr)+',PROJECTION["Lambert_Azimuthal_Equal_Area"],PARAMETER["False_Easting",0.0],PARAMETER["False_Northing",0.0],PARAMETER["central_meridian",0.0],PARAMETER["latitude_of_origin",0.0],UNIT["Meter",1.0]]'
-	
-	if sr.IsProjected():
-		union_polygon.Transform(geog_to_proj)
-
-	""" Change reference meridian in geographic coordinate system to center of input polygon to avoid problems during dateline intersection. """
-	
-	geogr_sr_reprojection_text = re.sub('(PRIMEM)(.*)(,)', r'\1["Reference_Meridian",' + str(projection_center_X) + '],', str(geogr_sr))
-	geogr_sr_reprojection = osr.SpatialReference(geogr_sr_reprojection_text)
-	
-	proj_cs_section_text = sr_text.partition('PROJECTION')
-	
-	sr_eq_area_reprojection_text = 'PROJCS["LAEA_REPROJECTION_EQ_AREA",'+str(geogr_sr_reprojection_text)+',PROJECTION' + proj_cs_section_text[2]		
-	sr_eq_area_reprojection = osr.SpatialReference(sr_eq_area_reprojection_text)
-	
-	sr_to_eq_area = osr.CoordinateTransformation(sr, sr_eq_area_reprojection)
-	eq_area_to_sr = osr.CoordinateTransformation(sr_eq_area_reprojection, sr)
-	
-	""" Get Geometry from WKT, reproject buffered craters to input spatial reference and store geometry in buffered_craters_geometry list. """
-	
-	for buffered_crater in buffered_craters_wkt_list:
-		buffered_crater_polygon = ogr.CreateGeometryFromWkt(buffered_crater[0])
-		buffered_crater_polygon.Transform(geog_to_proj)
-		buffered_craters_geometry_list.append(buffered_crater_polygon)
-	
-	buffered_craters_geometry_list_2 = list(buffered_craters_geometry_list)
-	crater_index = 0
-	
-	for buffered_crater in buffered_craters_geometry_list:
+		""" Convert spatial reference from wkt to spatial reference type (during multiprocessing). Also, Transformations etc. need to be defined as Spatial reference data type can't
+		be handed to function during multiprocessing """
 		
-		""" Get distance to crater from previous list (determined in get_craters_for_buffering_NSC_BNSC function via Vincenty's formulae) """
+		if isinstance(sr_wkt, basestring) == True:
+			sr = osr.SpatialReference()
+			sr.ImportFromWkt(sr_wkt)
+			
+		if isinstance(sr_wkt, basestring) == False:
+			sr = sr_wkt
 		
-		distance_crater_area = buffered_craters_wkt_list[crater_index][1]
-		original_crater_id = buffered_craters_wkt_list[crater_index][2]
-		obliteration_status = buffered_craters_wkt_list[crater_index][4]
+		geogr_sr = sr.CloneGeogCS()
 		
-		if len(craters_for_counting_list) > 0:
-			print "Process", process_count, ": Processing crater", original_crater_id, ":", round(((float(crater_index) / float(len(craters_for_counting_list)))*100), 1), "%"
-			
-			""" Detailled logfile is only written in single-core mode """
-			
-			if write_logfile == True and multicore_operation == False:
-				logfile.write("Process " + str(process_count) + ": Processing crater " + str(original_crater_id) + ": " + str(round(((float(crater_index) / float(len(craters_for_counting_list)))*100), 1)) + " %\n")
-				logfile.flush()
-		
-		""" Start with largest crater, erase larger craters (craters with index -1) from initial reference area """
-		
-		if crater_index > 0:
-			buffered_crater_geometry_larger = buffered_craters_geometry_list[crater_index - 1]
-			union_polygon = union_polygon.Difference(buffered_crater_geometry_larger)
-			
-			""" Ignore craters that are located on top of an ejecta blanket for CSFD measurement. """
-			
-			if obliteration_status == "obliterates":
-				crater_index += 1
-				continue
-			
-		""" Buffer reference area during BNSC after a crater + ejecta blanket is removed. """
-			
-		if approach == "BNSC":
-			
-			""" The reference area with removed craters and two lists are available at this point: buffered_craters_geometry_list (all the buffered crater geometries with 
-			respective IDs and distance from initial reference area) and craters_for_counting_list_BNSC (information on craters which are included in the counting process but 
-			splitted for multicore processing). During multiprocessing, craters_for_counting_list_BNSC is used to buffer the reference area according to the respective 
-			crater diameters. When a crater is removed from the reference area, the script checks if that particular crater is included in craters_for_counting_list_BNSC. 
-			If it is included, the reference area is buffered. This procedure is conducted to optimize the BNSC buffering for multicore computation. In every process, all craters in 
-			buffered_craters_geometry_list are removed from the reference area but the area is only buffered if the crater is included in the splitted 
-			craters_for_counting_list_BNSC list. The process of removing craters is conducted multiple times (one time in each process - extra effort but not very time consuming) 
-			while the areas for buffering are unique for each process. """
-			
-			""" Check if crater which was currently removed from the reference area is in craters_for_counting_list_BNSC """
-			
-			for BNSC_crater in craters_for_counting_list_BNSC:
-				BNSC_crater_id = BNSC_crater[0]
-				
-				if BNSC_crater_id == original_crater_id:
-					BNSC_crater_diameter = BNSC_crater[1]
-					buffer_distance_polygon_BNSC = ((BNSC_crater_diameter * 1000)/2) * bufferfactor
-					
-					#####################################################################
-					#																	#
-					# BNSC BUFFER (not in a separate function due to multicore support)	#
-					#																	#
-					#####################################################################
-					
-					BNSC_union_polygon = ogr.Geometry(ogr.wkbPolygon)
-					
-					""" Segmentize polygon to decreacse the effect of angular distortion in polar regions. """
-					
-					if sr.IsProjected():
-						union_polygon.Segmentize(10000)
-						union_polygon.Transform(proj_to_geogr)
-					if sr.IsGeographic():
-						union_polygon.Segmentize(1)
-					
-					""" Consider dateline intersections: Get center of research area to define projection center. """
-					
-					union_polygon_centroid = union_polygon.Centroid()
-					union_polygon_centroid_X, union_polygon_centroid_Y, union_polygon_centroid_Z = union_polygon_centroid.GetPoint()
-					projection_center_X = round(union_polygon_centroid_X, 1)
-					projection_center_Y = round(union_polygon_centroid_Y, 1)
-					
-					""" If a polygon intersects a dateline, it may happen that the centroid is wrongly identified (Polygon intersects dateline vs. 
-					Polygon spans globe with a hole over dateline). If polygon cuts lines (which we assume to be datelines) at lon -179.8 and lon 179.8, we assume that a dateline 
-					intersection is present. In this case, we set the projection center to (false projection center (if closer than 80 deg lon to central meridian) + 100 deg 
-					lon). It is quite experimental to set a fixed lon value but it works in all cases we tested. """
-					
-					dateline_1 = ogr.Geometry(ogr.wkbLineString)
-					dateline_1.AddPoint(-179, 90)
-					dateline_1.AddPoint(-179, -90)
-				
-					dateline_2 = ogr.Geometry(ogr.wkbLineString)
-					dateline_2.AddPoint(179, 90)
-					dateline_2.AddPoint(179, -90)
-					
-					""" If both lines (lon +179.8 & -179.8) are intersecting the polygon, we assume a dateline intersection rather than a global polygon. """
-					
-					if union_polygon.Intersects(dateline_1) == True and union_polygon.Intersects(dateline_2) == True:
-						if projection_center_X < 80 and projection_center_X > -80:
-							projection_center_X = projection_center_X + 100
-					
-					""" Change reference meridian in geographic coordinate system to center of input polygon to avoid problems during dateline intersection. """
-					
-					geogr_sr_reprojection_text = re.sub('(PRIMEM)(.*)(,)', r'\1["Reference_Meridian",' + str(projection_center_X) + '],', str(geogr_sr))
-					geogr_sr_reprojection = osr.SpatialReference(geogr_sr_reprojection_text)
-					
-					sr_reprojection_text = 'PROJCS["LAEA_REPROJECTION_EQ_AREA",'+str(geogr_sr_reprojection_text)+',PROJECTION["Lambert_Azimuthal_Equal_Area"],PARAMETER["False_Easting",0.0],PARAMETER["False_Northing",0.0],PARAMETER["central_meridian",' + str(projection_center_X) + '],PARAMETER["latitude_of_origin",' + str(projection_center_Y) + '],UNIT["Meter",1.0]]'
-					sr_reprojection = osr.SpatialReference(sr_reprojection_text)
-					
-					geogr_to_proj_reprojection = osr.CoordinateTransformation(geogr_sr, sr_reprojection)
-					proj_reprojection_to_geogr_reprojection = osr.CoordinateTransformation(sr_reprojection, geogr_sr_reprojection)
-					geogr_reprojection_to_proj_reprojection = osr.CoordinateTransformation(geogr_sr_reprojection, sr_reprojection) 
-					proj_reprojection_to_geogr = osr.CoordinateTransformation(sr_reprojection, geogr_sr)
-					
-					""" Reproject input polygon to consider dateline intersections """
-					
-					union_polygon.Transform(geogr_to_proj_reprojection)
-					union_polygon.Transform(proj_reprojection_to_geogr_reprojection)
-					
-					""" LINEARRING features must be used when MULTIPOLYGON (multiple areas) is present and LINEARRING must be taken when POLYGON (single area) 
-					is present. """
-					
-					for area in union_polygon:
-						number_of_inner_polygons = 0
-						number_of_holes = 0
-						
-						#############################
-						#	Step 1: CUT POLYGON		#
-						#############################
-						
-						""" Determine number of polygons and number of holes to correctly split and buffer the data. """
-						
-						if area.GetGeometryName() == "LINEARRING":
-							area_polygon = ogr.Geometry(ogr.wkbPolygon)
-							area_polygon.AddGeometry(area)
-						else:
-							area_polygon = ogr.Geometry(ogr.wkbPolygon)
-							area_polygon.AddGeometry(area.GetGeometryRef(0)) 
-						
-						if area.GetGeometryName() == "LINEARRING":
-							number_of_holes = union_polygon.GetGeometryCount() - 1
-							#print "There is one inner polygon and", number_of_holes, "holes for this polygon."
-							
-						if area.GetGeometryName() == "POLYGON":
-							number_of_inner_polygons = union_polygon.GetGeometryCount()
-							number_of_holes = area.GetGeometryCount() - 1 # When union_polygon becomes MULTIPOLYGON due to clip and buffer (formation of islands) 
-							#print "There are", number_of_inner_polygons, "inner polygons and", area.GetGeometryCount() - 1, "holes for this polygon."
-						
-						""" Get inner rings: Get centroid of hole and split union_polygon or area into multiple parts according to holes. This way, only outlines need to be buffered (buffering 
-						outlines is faster than buffering inner ring). """
-						
-						if number_of_holes > 0:
-							if area.GetGeometryName() == "LINEARRING":
-								union_polygon_2 = ogr.CreateGeometryFromWkt(union_polygon.ExportToWkt())
-							
-							if area.GetGeometryName() == "POLYGON":
-								area_2 = ogr.CreateGeometryFromWkt(area.ExportToWkt())
-							
-							for hole_count in range(number_of_holes):
-								if number_of_inner_polygons == 0:
-									inner_ring_geometry = union_polygon.GetGeometryRef(hole_count + 1)
-								if number_of_inner_polygons > 0:
-									inner_ring_geometry = area.GetGeometryRef(hole_count + 1)
-								
-								""" Get center of inner ring. Inner ring geometry has to be transformed from LINEARRING to POLYGON geometry. """
-								
-								inner_ring_polygon_geometry = ogr.Geometry(ogr.wkbPolygon)
-								inner_ring_polygon_geometry.AddGeometry(inner_ring_geometry)
-								
-								inner_ring_centroid = inner_ring_polygon_geometry.Centroid()
-								inner_ring_centroid_X, inner_ring_centroid_Y, inner_ring_centroid_Z = inner_ring_centroid.GetPoint()
-								
-								""" Generate lines which intersect centroid of inner rings.  """
-								
-								cut_line = ogr.Geometry(ogr.wkbLineString)
-								cut_line.AddPoint(0, 90)
-								cut_line.AddPoint(inner_ring_centroid_X, inner_ring_centroid_Y)
-								cut_line.AddPoint(0, -90)
-								
-								""" Generate splitted area from reference area and (buffered) split lines. OGR doesn't support polygon splitting 
-								by lines. """
-								
-								buffered_cut_line = cut_line.Buffer(0.00000000001) 
-								if area.GetGeometryName() == "LINEARRING":
-									union_polygon_2 = union_polygon_2.Difference(buffered_cut_line)
-									area_polygon = union_polygon_2
-								if area.GetGeometryName() == "POLYGON":
-									area_2 = area_2.Difference(buffered_cut_line)
-									area_polygon = area_2
-						
-						#################################
-						#	Step 2: BUFFER POLYGON		#
-						#################################
-						
-						""" Get each linear ring in the area polygon (polygon outlines or splitted polygon parts when polygon has holes) and buffer outlines. 
-						Holes are not present anymore. """
-						
-						for linear_ring in area_polygon:
-							
-							""" area_polygon is MULTIPOLYGON when polygon with holes (splitted polygon) is present. area_polygon is LINEARRING when no holes 
-							are present (no splitted polygon). Using GetGeometryRef(0) we get the linear ring from the polygon when splitting was conducted. """
-							
-							if linear_ring.GetGeometryName() == "LINEARRING":
-								linear_ring = linear_ring
-							else:
-								linear_ring = linear_ring.GetGeometryRef(0)
-							
-							splitted_buffered_polygon = ogr.Geometry(ogr.wkbPolygon)
-							splitted_buffered_ring = ogr.Geometry(ogr.wkbLinearRing)
-							
-							no_of_polygon_vertices = linear_ring.GetPointCount()
-							vertices_angle_list = []
-							
-							""" Get buffer points for outer polygon boundary. """
-					
-							for vertex in xrange(no_of_polygon_vertices):
-								current_vertex_X, current_vertex_Y, z = linear_ring.GetPoint(vertex)
-								
-								""" Check if polygon is closed (first and last vertex share same coordinates) and modify neighboring vertices accordingly. """
-								
-								if linear_ring.GetPoint(0) == linear_ring.GetPoint(no_of_polygon_vertices - 1):
-									if vertex == 0:
-										vertex_position = "first"
-										previous_vertex_X, previous_vertex_Y, z = linear_ring.GetPoint(no_of_polygon_vertices - 2)
-										next_vertex_X, next_vertex_Y, z = linear_ring.GetPoint(vertex + 1)
-									if vertex == no_of_polygon_vertices - 1:
-										vertex_position = "last"
-										previous_vertex_X, previous_vertex_Y, z = linear_ring.GetPoint(vertex - 1)
-										next_vertex_X, next_vertex_Y, z = linear_ring.GetPoint(1)
-									if vertex > 0 and vertex < no_of_polygon_vertices - 1:
-										vertex_position = "middle" 
-										previous_vertex_X, previous_vertex_Y, z = linear_ring.GetPoint(vertex - 1)
-										next_vertex_X, next_vertex_Y, z = linear_ring.GetPoint(vertex + 1)
-								else:
-									if vertex == 0:
-										vertex_position = "first"
-										previous_vertex_X, previous_vertex_Y, z = linear_ring.GetPoint(no_of_polygon_vertices - 1)
-										next_vertex_X, next_vertex_Y, z = linear_ring.GetPoint(vertex + 1)
-									if vertex == no_of_polygon_vertices - 1:
-										vertex_position = "last"
-										previous_vertex_X, previous_vertex_Y, z = linear_ring.GetPoint(vertex - 1)
-										next_vertex_X, next_vertex_Y, z = linear_ring.GetPoint(0)
-									if vertex > 0 and vertex < no_of_polygon_vertices - 1:
-										vertex_position = "middle" 
-										previous_vertex_X, previous_vertex_Y, z = linear_ring.GetPoint(vertex - 1)
-										next_vertex_X, next_vertex_Y, z = linear_ring.GetPoint(vertex + 1)
-								
-								""" Calculate angle between previous vertex - current vertex and current vertex - next vertex from vincenty's inverse formula 
-								( calculation on a spheroid ). """
-								
-								inverse_vincenty(flattening, major_axis, previous_vertex_Y, previous_vertex_X, current_vertex_Y, current_vertex_X )
-								angle_prev = direction12
-								
-								inverse_vincenty(flattening, major_axis, current_vertex_Y, current_vertex_X, next_vertex_Y, next_vertex_X )
-								angle_next = direction12
-								
-								""" Ensure that angles remain within 0-360 deg range. """
-								
-								if angle_prev < 0:
-									angle_prev = angle_prev + 360
-								if angle_next < 0:
-									angle_next = angle_next + 360
-								
-								angle_prev_BP = angle_prev - 90 
-								angle_next_BP = angle_next - 90 
-								
-								""" Ensure that buffer points are perpendicular to reference area and remain within 0-360 deg range. """
-								
-								if angle_prev_BP < 0:
-									angle_prev_BP = angle_prev_BP + 360  
-								if angle_next_BP < 0:
-									angle_next_BP = angle_next_BP + 360 
-								
-								""" Add to list in which coordinates and angles for buffer vertices calculation are stored """
-								
-								vertices_angle_list.append([current_vertex_X, current_vertex_Y, angle_prev_BP, angle_prev, angle_next])
-								
-								""" Remember coordinates of the buffer polygon's first vertex - used later to close polygon """
-								
-								if vertex == 0:
-									X_0 = current_vertex_X
-									Y_0 = current_vertex_Y
-									angle_0 = angle_prev_BP
-									angle_prev_0 = angle_prev
-									angle_next_0 = angle_next
-								
-								""" Calculate buffer points between angle_prev-90 and angle_next-90 (used for round buffer edges). """
-								
-								if angle_next_BP > angle_prev_BP:
-									if (angle_next_BP) - (angle_prev_BP) <= 180:
-										
-										""" Angles between previous and next buffer point - generate buffer points which are outside the original polygon """
-										
-										angles = numpy.arange(angle_prev_BP, angle_next_BP, 8)
-										for angle in angles:
-											vertices_angle_list.append([current_vertex_X, current_vertex_Y, angle, angle_prev, angle_next])
-									if (angle_next_BP) - (angle_prev_BP) > 180:
-										
-										""" Scissor intersection: angles between next buffer point and 360 degrees and between 0 degrees and previous buffer point - generate buffer points which are outside the original polygon """
-										
-										angles = numpy.arange(angle_next_BP, 360, 8)
-										for angle in angles:
-											vertices_angle_list.append([current_vertex_X, current_vertex_Y, angle, angle_prev, angle_next])
-										angles = numpy.arange(0, angle_prev_BP, 8)
-										for angle in angles:
-											vertices_angle_list.append([current_vertex_X, current_vertex_Y, angle, angle_prev, angle_next])
-								if angle_next_BP < angle_prev_BP:
-									if angle_next_BP - angle_prev_BP > -180:
-										
-										""" Angles between next and previous buffer point - generate buffer points which are outside the original polygon """
-										
-										angles = numpy.arange(angle_next_BP, angle_prev_BP, 8)
-										for angle in angles:
-											vertices_angle_list.append([current_vertex_X, current_vertex_Y, angle, angle_prev, angle_next])
-									if angle_next_BP - angle_prev_BP <= -180:
-										
-										""" Scissor intersection - angles between previous buffer point and 360 degrees and between 0 degrees and next buffer point - generate buffer points which are outside the original polygon """
-										
-										angles = numpy.arange(angle_prev_BP, 360, 8)
-										for angle in angles:
-											vertices_angle_list.append([current_vertex_X, current_vertex_Y, angle, angle_prev, angle_next])
-										angles = numpy.arange(0, angle_next_BP, 8)
-										for angle in angles:
-											vertices_angle_list.append([current_vertex_X, current_vertex_Y, angle, angle_prev, angle_next])
-								
-								vertices_angle_list.append([current_vertex_X, current_vertex_Y, angle_next_BP, angle_prev, angle_next])
-							
-							""" Close polygon using the first vertex. """
-							
-							vertices_angle_list.append([X_0, Y_0, angle_0, angle_prev_0, angle_next_0])
-							
-							""" Calculate coordinates of buffer points for outer polygon. """
-							
-							direct_vincenty(flattening, major_axis, vertices_angle_list, buffer_distance_polygon_BNSC, 1)
-							
-							for buffer_vertex in buffer_vertices_list:
-								
-								""" Add point to ring geometry. """
-								
-								splitted_buffered_ring.AddPoint(buffer_vertex[0], buffer_vertex[1])
-							
-							""" Add ring to polygon geometry. """
-							
-							splitted_buffered_polygon.AddGeometry(splitted_buffered_ring)
-							
-							""" Eliminate unwanted holes due to self-intersections on outer boundary using a planar buffer of zero distance. """
-							
-							splitted_buffered_polygon = splitted_buffered_polygon.Buffer(0)
-							
-							""" Errors may occur during Buffer(0) so that two polygons are formed from one polygon dur to severe self-intersections. 
-							This would lead to an invalid geometry which could not be added to the BNSC_union_polygon. To prevent this, all geometries 
-							in the splitted_buffered_polygon are investigated, Buffered (0) again and then added to the BNSC_union_polygon. """
-							
-							if splitted_buffered_polygon.IsValid() == False:
-							
-								for linear_ring_splitted_buffered_polygon in splitted_buffered_polygon:
-									
-									""" Add linear_ring_splitted_buffered_polygon to new polygon. """
-									
-									polygon_part_splitted_buffered_polygon = ogr.Geometry(ogr.wkbPolygon)
-									polygon_part_splitted_buffered_polygon.AddGeometry(linear_ring_splitted_buffered_polygon)
-									polygon_part_splitted_buffered_polygon = polygon_part_splitted_buffered_polygon.Buffer(0)
-									
-									if polygon_part_splitted_buffered_polygon.IsValid() == False:
-										print "Error due to severe self-intersection during buffering. Please check the shapefile for errors."
-										if write_logfile == True and multicore_operation == False:
-											logfile.write("Error due to severe self-intersection during buffering. Please check the shapefile for errors.")
-											logfile.flush()
-										exit()
-									
-									BNSC_union_polygon = BNSC_union_polygon.Union(polygon_part_splitted_buffered_polygon)
-							
-							if splitted_buffered_polygon.IsValid() == True:
-								
-								BNSC_union_polygon = BNSC_union_polygon.Union(splitted_buffered_polygon)
-						
-						""" Special case: If only one research area with hole(s) is investigated, iteration in union_polygon would not consider polygon1, polygon2, 
-						polygon3, etc., but ring1, ring2, ring3, etc. As the inner ring is already considered during iteration (because it is assumed that in 'for area in union_polygon' 
-						area is a research area and not a linear ring), the function has to be stopped here. Otherwise, every further iteration in union polygon would consider 
-						the linear rings which have already been considered in the function. This would lead to too many resulting polygons (rings*no_of_craters and not no_of_craters). """
-						
-						if len(Area_IDs) == 1 and number_of_inner_polygons == 0 and number_of_holes >= 1:
-							break
-					
-					""" Project union_polygon & BNSC_union_polygon back to original spatial reference (to be used in NSC_BNSC_exclude_craters function). """
-					
-					BNSC_union_polygon.Transform(geogr_reprojection_to_proj_reprojection)
-					BNSC_union_polygon.Transform(proj_reprojection_to_geogr)
-					
-					union_polygon.Transform(geogr_reprojection_to_proj_reprojection)
-					union_polygon.Transform(proj_reprojection_to_geogr)
-					
-					if sr.IsProjected(): 
-						union_polygon.Transform(geog_to_proj)
-						BNSC_union_polygon.Transform(geog_to_proj)
-		
-		#########################
-		#						#
-		# END OF BNSC BUFFERING	#
-		#						#
-		#########################
-		
-		if approach == "NSC":
-			union_polygon.Transform(sr_to_eq_area)
-			geodesic_area = union_polygon.GetArea()/1000000
-			union_polygon.Transform(eq_area_to_sr)
-			
-			""" Exclude craters outside reference area for CSFD measurement (NSC only). """
-			
-			if distance_crater_area > 0:
-				crater_index += 1
-				continue
-				
+		if multicore_operation == True:
 			if generate_polygon_file == True:
-				polygon_feature.SetGeometry(union_polygon) 
-				polygon_feature.SetField('Size_sq_km', geodesic_area)
-				polygon_feature.SetField('crater_ID', original_crater_id)
-				layer_polygon.CreateFeature(polygon_feature)
-			
-			crater_diam = craters_for_counting_list[crater_index][1]
-			crater_X = craters_for_counting_list[crater_index][2]
-			crater_Y = craters_for_counting_list[crater_index][3]
-			crater_area_list.append([crater_diam, crater_X, crater_Y, crater_diam * bufferfactor_crater, geodesic_area])
-		
-		if approach == "BNSC":
-			
-			""" 'If BNSC_union_polygon' condition is used to only write geometry to shapefile if buffering took place. Otherwise 
-			 extra geometries would be added here during multicore processing.  """
-			
-			if 'BNSC_union_polygon' in locals() or 'BNSC_union_polygon' in globals():
-				BNSC_union_polygon.Transform(sr_to_eq_area)
-				geodesic_area = BNSC_union_polygon.GetArea()/1000000
+				outfile_split = os.path.split(path_to_outfile)
+				outfile_path = str(outfile_split[0]) + "\\"
+				outfile_name = str(outfile_split[1])
+				outfile_name_no_extension = os.path.splitext(outfile_name)[0]
 				
-				if geodesic_area == 0:
+				driver = ogr.GetDriverByName('ESRI Shapefile') 
+				polygon_data_source = driver.CreateDataSource(outfile_path + outfile_name_no_extension + "_" + str(process_count) + ".shp") 
+				
+				layer_polygon = polygon_data_source.CreateLayer('Buffer_Polygon', sr, geom_type = ogr.wkbPolygon)
+				
+				idField = ogr.FieldDefn('Size_sq_km', ogr.OFTReal)
+				layer_polygon.CreateField(idField)
+				idField = ogr.FieldDefn('crater_ID', ogr.OFTInteger)
+				layer_polygon.CreateField(idField)
+		
+		if generate_polygon_file == True:
+			polygon_featureDefn = layer_polygon.GetLayerDefn()
+			polygon_feature = ogr.Feature(polygon_featureDefn)
+		
+		buffered_craters_geometry_list = []
+		
+		""" Define coordinate reprojections: craters are in geogr sr and have to be projected to proj sr if input reference system is projected. """
+		
+		geog_to_proj = osr.CoordinateTransformation(geogr_sr, sr)
+		proj_to_geogr = osr.CoordinateTransformation(sr, geogr_sr) 
+		
+		if sr.IsProjected():
+			union_polygon_sr = union_polygon.GetSpatialReference()
+			if union_polygon_sr:
+				if union_polygon_sr.IsProjected():
+					union_polygon.Transform(proj_to_geogr)
+			if not union_polygon_sr:
+				union_polygon.Transform(proj_to_geogr)
+		
+		""" Get center of research area to define projection center. """
+		
+		union_polygon_centroid = union_polygon.Centroid()
+		union_polygon_centroid_X, union_polygon_centroid_Y, union_polygon_centroid_Z = union_polygon_centroid.GetPoint()
+		
+		projection_center_X = round(union_polygon_centroid_X, 1)
+		projection_center_Y = round(union_polygon_centroid_Y, 1)
+		
+		
+		""" If a polygon intersects a dateline, it may happen that the centroid is wrongly identified (Polygon intersects dateline vs. 
+		Polygon spans globe with a hole over dateline). If polygon cuts lines (which we assume to be datelines) at lon -179.8 and lon 179.8, we assume that a dateline 
+		intersection is present. In this case, we set the projection center to (false projection center (if closer than 80 deg lon to central meridian) + 100 deg 
+		lon). It is quite experimental to set a fixed lon value for such cases but it worked in all cases we tested. """
+		
+		dateline_1 = ogr.Geometry(ogr.wkbLineString)
+		dateline_1.AddPoint(-179, 90)
+		dateline_1.AddPoint(-179, -90)
+	
+		dateline_2 = ogr.Geometry(ogr.wkbLineString)
+		dateline_2.AddPoint(179, 90)
+		dateline_2.AddPoint(179, -90)
+		
+		""" If both lines (lon +179.8 & -179.8) are intersecting the polygon, we assume a dateline intersection rather than a global polygon. """
+		
+		if union_polygon.Intersects(dateline_1) == True and union_polygon.Intersects(dateline_2) == True:
+			if projection_center_X < 80 and projection_center_X > -80:
+				projection_center_X = projection_center_X + 100
+		
+		sr_text = 'PROJCS["PROJECTED_LAMBERT_AEA",'+str(geogr_sr)+',PROJECTION["Lambert_Azimuthal_Equal_Area"],PARAMETER["False_Easting",0.0],PARAMETER["False_Northing",0.0],PARAMETER["central_meridian",0.0],PARAMETER["latitude_of_origin",0.0],UNIT["Meter",1.0]]'
+		
+		if sr.IsProjected():
+			union_polygon.Transform(geog_to_proj)
+	
+		""" Change reference meridian in geographic coordinate system to center of input polygon to avoid problems during dateline intersection. """
+		
+		geogr_sr_reprojection_text = re.sub('(PRIMEM)(.*)(,)', r'\1["Reference_Meridian",' + str(projection_center_X) + '],', str(geogr_sr))
+		geogr_sr_reprojection = osr.SpatialReference(geogr_sr_reprojection_text)
+		
+		proj_cs_section_text = sr_text.partition('PROJECTION')
+		
+		sr_eq_area_reprojection_text = 'PROJCS["LAEA_REPROJECTION_EQ_AREA",'+str(geogr_sr_reprojection_text)+',PROJECTION' + proj_cs_section_text[2]		
+		sr_eq_area_reprojection = osr.SpatialReference(sr_eq_area_reprojection_text)
+		
+		sr_to_eq_area = osr.CoordinateTransformation(sr, sr_eq_area_reprojection)
+		eq_area_to_sr = osr.CoordinateTransformation(sr_eq_area_reprojection, sr)
+		
+		""" Get Geometry from WKT, reproject buffered craters to input spatial reference and store geometry in buffered_craters_geometry list. """
+		
+		for buffered_crater in buffered_craters_wkt_list:
+			buffered_crater_polygon = ogr.CreateGeometryFromWkt(buffered_crater[0])
+			buffered_crater_polygon.Transform(geog_to_proj)
+			buffered_craters_geometry_list.append(buffered_crater_polygon)
+		
+		buffered_craters_geometry_list_2 = list(buffered_craters_geometry_list)
+		crater_index = 0
+		
+		for buffered_crater in buffered_craters_geometry_list:
+			
+			""" Get distance to crater from previous list (determined in get_craters_for_buffering_NSC_BNSC function via Vincenty's formulae) """
+			
+			distance_crater_area = buffered_craters_wkt_list[crater_index][1]
+			original_crater_id = buffered_craters_wkt_list[crater_index][2]
+			obliteration_status = buffered_craters_wkt_list[crater_index][4]
+			
+			if len(craters_for_counting_list) > 0:
+				print "Process", process_count, ": Processing crater", original_crater_id, ":", round(((float(crater_index) / float(len(craters_for_counting_list)))*100), 1), "%"
+				
+				""" Detailled logfile is only written in single-core mode """
+				
+				if write_logfile == True and multicore_operation == False:
+					logfile.flush()
+			
+			""" Start with largest crater, erase larger craters (craters with index -1) from initial reference area """
+			
+			if crater_index > 0:
+				buffered_crater_geometry_larger = buffered_craters_geometry_list[crater_index - 1]
+				union_polygon = union_polygon.Difference(buffered_crater_geometry_larger)
+				
+				""" Ignore craters that are located on top of an ejecta blanket for CSFD measurement. """
+				
+				if obliteration_status == "obliterates":
+					crater_index += 1
+					continue
+				
+			""" Buffer reference area during BNSC after a crater + ejecta blanket is removed. """
+				
+			if approach == "BNSC":
+				
+				""" The reference area with removed craters and two lists are available at this point: buffered_craters_geometry_list (all the buffered crater geometries with 
+				respective IDs and distance from initial reference area) and craters_for_counting_list_BNSC (information on craters which are included in the counting process but 
+				splitted for multicore processing). During multiprocessing, craters_for_counting_list_BNSC is used to buffer the reference area according to the respective 
+				crater diameters. When a crater is removed from the reference area, the script checks if that particular crater is included in craters_for_counting_list_BNSC. 
+				If it is included, the reference area is buffered. This procedure is conducted to optimize the BNSC buffering for multicore computation. In every process, all craters in 
+				buffered_craters_geometry_list are removed from the reference area but the area is only buffered if the crater is included in the splitted 
+				craters_for_counting_list_BNSC list. The process of removing craters is conducted multiple times (one time in each process - extra effort but not very time consuming) 
+				while the areas for buffering are unique for each process. """
+				
+				""" Check if crater which was currently removed from the reference area is in craters_for_counting_list_BNSC """
+				
+				for BNSC_crater in craters_for_counting_list_BNSC:
+					BNSC_crater_id = BNSC_crater[0]
 					
-					""" This is a special case. If two large craters cut the reference area (the reference area is completely superposed 
-					by crater + ejecta blanket), the smaller crater will not be used to buffer the area even though it cuts the reference 
-					area and is located distant enough to the larger crater to be (theoretically) included in the counting. Since the area is 
-					eliminated by the larger crater + ejecta blanket already, there is nothing to buffer (geodesic area size = 0). 
-					This is a matter of dimensions. The suitability of the reference area for CSFD measurements should be investigated again. """
+					if BNSC_crater_id == original_crater_id:
+						BNSC_crater_diameter = BNSC_crater[1]
+						buffer_distance_polygon_BNSC = ((BNSC_crater_diameter * 1000)/2) * bufferfactor
+						
+						#####################################################################
+						#																	#
+						# BNSC BUFFER (not in a separate function due to multicore support)	#
+						#																	#
+						#####################################################################
+						
+						BNSC_union_polygon = ogr.Geometry(ogr.wkbPolygon)
+						
+						""" Segmentize polygon to decreacse the effect of angular distortion in polar regions. """
+						
+						if sr.IsProjected():
+							union_polygon.Segmentize(10000)
+							union_polygon.Transform(proj_to_geogr)
+						if sr.IsGeographic():
+							union_polygon.Segmentize(1)
+						
+						""" Consider dateline intersections: Get center of research area to define projection center. """
+						
+						union_polygon_centroid = union_polygon.Centroid()
+						union_polygon_centroid_X, union_polygon_centroid_Y, union_polygon_centroid_Z = union_polygon_centroid.GetPoint()
+						projection_center_X = round(union_polygon_centroid_X, 1)
+						projection_center_Y = round(union_polygon_centroid_Y, 1)
+						
+						""" If a polygon intersects a dateline, it may happen that the centroid is wrongly identified (Polygon intersects dateline vs. 
+						Polygon spans globe with a hole over dateline). If polygon cuts lines (which we assume to be datelines) at lon -179.8 and lon 179.8, we assume that a dateline 
+						intersection is present. In this case, we set the projection center to (false projection center (if closer than 80 deg lon to central meridian) + 100 deg 
+						lon). It is quite experimental to set a fixed lon value but it works in all cases we tested. """
+						
+						dateline_1 = ogr.Geometry(ogr.wkbLineString)
+						dateline_1.AddPoint(-179, 90)
+						dateline_1.AddPoint(-179, -90)
 					
+						dateline_2 = ogr.Geometry(ogr.wkbLineString)
+						dateline_2.AddPoint(179, 90)
+						dateline_2.AddPoint(179, -90)
+						
+						""" If both lines (lon +179.8 & -179.8) are intersecting the polygon, we assume a dateline intersection rather than a global polygon. """
+						
+						if union_polygon.Intersects(dateline_1) == True and union_polygon.Intersects(dateline_2) == True:
+							if projection_center_X < 80 and projection_center_X > -80:
+								projection_center_X = projection_center_X + 100
+						
+						""" Change reference meridian in geographic coordinate system to center of input polygon to avoid problems during dateline intersection. """
+						
+						geogr_sr_reprojection_text = re.sub('(PRIMEM)(.*)(,)', r'\1["Reference_Meridian",' + str(projection_center_X) + '],', str(geogr_sr))
+						geogr_sr_reprojection = osr.SpatialReference(geogr_sr_reprojection_text)
+						
+						sr_reprojection_text = 'PROJCS["LAEA_REPROJECTION_EQ_AREA",'+str(geogr_sr_reprojection_text)+',PROJECTION["Lambert_Azimuthal_Equal_Area"],PARAMETER["False_Easting",0.0],PARAMETER["False_Northing",0.0],PARAMETER["central_meridian",' + str(projection_center_X) + '],PARAMETER["latitude_of_origin",' + str(projection_center_Y) + '],UNIT["Meter",1.0]]'
+						sr_reprojection = osr.SpatialReference(sr_reprojection_text)
+						
+						geogr_to_proj_reprojection = osr.CoordinateTransformation(geogr_sr, sr_reprojection)
+						proj_reprojection_to_geogr_reprojection = osr.CoordinateTransformation(sr_reprojection, geogr_sr_reprojection)
+						geogr_reprojection_to_proj_reprojection = osr.CoordinateTransformation(geogr_sr_reprojection, sr_reprojection) 
+						proj_reprojection_to_geogr = osr.CoordinateTransformation(sr_reprojection, geogr_sr)
+						
+						""" Reproject input polygon to consider dateline intersections """
+						
+						union_polygon.Transform(geogr_to_proj_reprojection)
+						union_polygon.Transform(proj_reprojection_to_geogr_reprojection)
+						
+						""" LINEARRING features must be used when MULTIPOLYGON (multiple areas) is present and LINEARRING must be taken when POLYGON (single area) 
+						is present. """
+						
+						for area in union_polygon:
+							number_of_inner_polygons = 0
+							number_of_holes = 0
+							
+							#############################
+							#	Step 1: CUT POLYGON		#
+							#############################
+							
+							""" Determine number of polygons and number of holes to correctly split and buffer the data. """
+							
+							if area.GetGeometryName() == "LINEARRING":
+								area_polygon = ogr.Geometry(ogr.wkbPolygon)
+								area_polygon.AddGeometry(area)
+							else:
+								area_polygon = ogr.Geometry(ogr.wkbPolygon)
+								area_polygon.AddGeometry(area.GetGeometryRef(0)) 
+							
+							if area.GetGeometryName() == "LINEARRING":
+								number_of_holes = union_polygon.GetGeometryCount() - 1
+								#print "There is one inner polygon and", number_of_holes, "holes for this polygon."
+								
+							if area.GetGeometryName() == "POLYGON":
+								number_of_inner_polygons = union_polygon.GetGeometryCount()
+								number_of_holes = area.GetGeometryCount() - 1 # When union_polygon becomes MULTIPOLYGON due to clip and buffer (formation of islands) 
+								#print "There are", number_of_inner_polygons, "inner polygons and", area.GetGeometryCount() - 1, "holes for this polygon."
+							
+							""" Get inner rings: Get centroid of hole and split union_polygon or area into multiple parts according to holes. This way, only outlines need to be buffered (buffering 
+							outlines is faster than buffering inner ring). """
+							
+							if number_of_holes > 0:
+								if area.GetGeometryName() == "LINEARRING":
+									union_polygon_2 = ogr.CreateGeometryFromWkt(union_polygon.ExportToWkt())
+								
+								if area.GetGeometryName() == "POLYGON":
+									area_2 = ogr.CreateGeometryFromWkt(area.ExportToWkt())
+								
+								for hole_count in range(number_of_holes):
+									if number_of_inner_polygons == 0:
+										inner_ring_geometry = union_polygon.GetGeometryRef(hole_count + 1)
+									if number_of_inner_polygons > 0:
+										inner_ring_geometry = area.GetGeometryRef(hole_count + 1)
+									
+									""" Get center of inner ring. Inner ring geometry has to be transformed from LINEARRING to POLYGON geometry. """
+									
+									inner_ring_polygon_geometry = ogr.Geometry(ogr.wkbPolygon)
+									inner_ring_polygon_geometry.AddGeometry(inner_ring_geometry)
+									
+									inner_ring_centroid = inner_ring_polygon_geometry.Centroid()
+									inner_ring_centroid_X, inner_ring_centroid_Y, inner_ring_centroid_Z = inner_ring_centroid.GetPoint()
+									
+									""" Generate lines which intersect centroid of inner rings.  """
+									
+									cut_line = ogr.Geometry(ogr.wkbLineString)
+									cut_line.AddPoint(0, 90)
+									cut_line.AddPoint(inner_ring_centroid_X, inner_ring_centroid_Y)
+									cut_line.AddPoint(0, -90)
+									
+									""" Generate splitted area from reference area and (buffered) split lines. OGR doesn't support polygon splitting 
+									by lines. """
+									
+									buffered_cut_line = cut_line.Buffer(0.00000000001) 
+									if area.GetGeometryName() == "LINEARRING":
+										union_polygon_2 = union_polygon_2.Difference(buffered_cut_line)
+										area_polygon = union_polygon_2
+									if area.GetGeometryName() == "POLYGON":
+										area_2 = area_2.Difference(buffered_cut_line)
+										area_polygon = area_2
+							
+							#################################
+							#	Step 2: BUFFER POLYGON		#
+							#################################
+							
+							""" Get each linear ring in the area polygon (polygon outlines or splitted polygon parts when polygon has holes) and buffer outlines. 
+							Holes are not present anymore. """
+							
+							for linear_ring in area_polygon:
+								
+								""" area_polygon is MULTIPOLYGON when polygon with holes (splitted polygon) is present. area_polygon is LINEARRING when no holes 
+								are present (no splitted polygon). Using GetGeometryRef(0) we get the linear ring from the polygon when splitting was conducted. """
+								
+								if linear_ring.GetGeometryName() == "LINEARRING":
+									linear_ring = linear_ring
+								else:
+									linear_ring = linear_ring.GetGeometryRef(0)
+								
+								splitted_buffered_polygon = ogr.Geometry(ogr.wkbPolygon)
+								splitted_buffered_ring = ogr.Geometry(ogr.wkbLinearRing)
+								
+								no_of_polygon_vertices = linear_ring.GetPointCount()
+								vertices_angle_list = []
+								
+								""" Get buffer points for outer polygon boundary. """
+						
+								for vertex in xrange(no_of_polygon_vertices):
+									current_vertex_X, current_vertex_Y, z = linear_ring.GetPoint(vertex)
+									
+									""" Check if polygon is closed (first and last vertex share same coordinates) and modify neighboring vertices accordingly. """
+									
+									if linear_ring.GetPoint(0) == linear_ring.GetPoint(no_of_polygon_vertices - 1):
+										if vertex == 0:
+											vertex_position = "first"
+											previous_vertex_X, previous_vertex_Y, z = linear_ring.GetPoint(no_of_polygon_vertices - 2)
+											next_vertex_X, next_vertex_Y, z = linear_ring.GetPoint(vertex + 1)
+										if vertex == no_of_polygon_vertices - 1:
+											vertex_position = "last"
+											previous_vertex_X, previous_vertex_Y, z = linear_ring.GetPoint(vertex - 1)
+											next_vertex_X, next_vertex_Y, z = linear_ring.GetPoint(1)
+										if vertex > 0 and vertex < no_of_polygon_vertices - 1:
+											vertex_position = "middle" 
+											previous_vertex_X, previous_vertex_Y, z = linear_ring.GetPoint(vertex - 1)
+											next_vertex_X, next_vertex_Y, z = linear_ring.GetPoint(vertex + 1)
+									else:
+										if vertex == 0:
+											vertex_position = "first"
+											previous_vertex_X, previous_vertex_Y, z = linear_ring.GetPoint(no_of_polygon_vertices - 1)
+											next_vertex_X, next_vertex_Y, z = linear_ring.GetPoint(vertex + 1)
+										if vertex == no_of_polygon_vertices - 1:
+											vertex_position = "last"
+											previous_vertex_X, previous_vertex_Y, z = linear_ring.GetPoint(vertex - 1)
+											next_vertex_X, next_vertex_Y, z = linear_ring.GetPoint(0)
+										if vertex > 0 and vertex < no_of_polygon_vertices - 1:
+											vertex_position = "middle" 
+											previous_vertex_X, previous_vertex_Y, z = linear_ring.GetPoint(vertex - 1)
+											next_vertex_X, next_vertex_Y, z = linear_ring.GetPoint(vertex + 1)
+									
+									""" Calculate angle between previous vertex - current vertex and current vertex - next vertex from vincenty's inverse formula 
+									( calculation on a spheroid ). """
+									
+									inverse_vincenty(flattening, major_axis, previous_vertex_Y, previous_vertex_X, current_vertex_Y, current_vertex_X )
+									angle_prev = direction12
+									
+									inverse_vincenty(flattening, major_axis, current_vertex_Y, current_vertex_X, next_vertex_Y, next_vertex_X )
+									angle_next = direction12
+									
+									""" Ensure that angles remain within 0-360 deg range. """
+									
+									if angle_prev < 0:
+										angle_prev = angle_prev + 360
+									if angle_next < 0:
+										angle_next = angle_next + 360
+									
+									angle_prev_BP = angle_prev - 90 
+									angle_next_BP = angle_next - 90 
+									
+									""" Ensure that buffer points are perpendicular to reference area and remain within 0-360 deg range. """
+									
+									if angle_prev_BP < 0:
+										angle_prev_BP = angle_prev_BP + 360  
+									if angle_next_BP < 0:
+										angle_next_BP = angle_next_BP + 360 
+									
+									""" Add to list in which coordinates and angles for buffer vertices calculation are stored """
+									
+									vertices_angle_list.append([current_vertex_X, current_vertex_Y, angle_prev_BP, angle_prev, angle_next])
+									
+									""" Remember coordinates of the buffer polygon's first vertex - used later to close polygon """
+									
+									if vertex == 0:
+										X_0 = current_vertex_X
+										Y_0 = current_vertex_Y
+										angle_0 = angle_prev_BP
+										angle_prev_0 = angle_prev
+										angle_next_0 = angle_next
+									
+									""" Calculate buffer points between angle_prev-90 and angle_next-90 (used for round buffer edges). """
+									
+									if angle_next_BP > angle_prev_BP:
+										if (angle_next_BP) - (angle_prev_BP) <= 180:
+											
+											""" Angles between previous and next buffer point - generate buffer points which are outside the original polygon """
+											
+											angles = numpy.arange(angle_prev_BP, angle_next_BP, 8)
+											for angle in angles:
+												vertices_angle_list.append([current_vertex_X, current_vertex_Y, angle, angle_prev, angle_next])
+										if (angle_next_BP) - (angle_prev_BP) > 180:
+											
+											""" Scissor intersection: angles between next buffer point and 360 degrees and between 0 degrees and previous buffer point - generate buffer points which are outside the original polygon """
+											
+											angles = numpy.arange(angle_next_BP, 360, 8)
+											for angle in angles:
+												vertices_angle_list.append([current_vertex_X, current_vertex_Y, angle, angle_prev, angle_next])
+											angles = numpy.arange(0, angle_prev_BP, 8)
+											for angle in angles:
+												vertices_angle_list.append([current_vertex_X, current_vertex_Y, angle, angle_prev, angle_next])
+									if angle_next_BP < angle_prev_BP:
+										if angle_next_BP - angle_prev_BP > -180:
+											
+											""" Angles between next and previous buffer point - generate buffer points which are outside the original polygon """
+											
+											angles = numpy.arange(angle_next_BP, angle_prev_BP, 8)
+											for angle in angles:
+												vertices_angle_list.append([current_vertex_X, current_vertex_Y, angle, angle_prev, angle_next])
+										if angle_next_BP - angle_prev_BP <= -180:
+											
+											""" Scissor intersection - angles between previous buffer point and 360 degrees and between 0 degrees and next buffer point - generate buffer points which are outside the original polygon """
+											
+											angles = numpy.arange(angle_prev_BP, 360, 8)
+											for angle in angles:
+												vertices_angle_list.append([current_vertex_X, current_vertex_Y, angle, angle_prev, angle_next])
+											angles = numpy.arange(0, angle_next_BP, 8)
+											for angle in angles:
+												vertices_angle_list.append([current_vertex_X, current_vertex_Y, angle, angle_prev, angle_next])
+									
+									vertices_angle_list.append([current_vertex_X, current_vertex_Y, angle_next_BP, angle_prev, angle_next])
+								
+								""" Close polygon using the first vertex. """
+								
+								vertices_angle_list.append([X_0, Y_0, angle_0, angle_prev_0, angle_next_0])
+								
+								""" Calculate coordinates of buffer points for outer polygon. """
+								
+								direct_vincenty(flattening, major_axis, vertices_angle_list, buffer_distance_polygon_BNSC, 1)
+								
+								for buffer_vertex in buffer_vertices_list:
+									
+									""" Add point to ring geometry. """
+									
+									splitted_buffered_ring.AddPoint(buffer_vertex[0], buffer_vertex[1])
+								
+								""" Add ring to polygon geometry. """
+								
+								splitted_buffered_polygon.AddGeometry(splitted_buffered_ring)
+								
+								""" Eliminate unwanted holes due to self-intersections on outer boundary using a planar buffer of zero distance. """
+								
+								splitted_buffered_polygon = splitted_buffered_polygon.Buffer(0)
+								
+								""" Errors may occur during Buffer(0) so that two polygons are formed from one polygon dur to severe self-intersections. 
+								This would lead to an invalid geometry which could not be added to the BNSC_union_polygon. To prevent this, all geometries 
+								in the splitted_buffered_polygon are investigated, Buffered (0) again and then added to the BNSC_union_polygon. """
+								
+								if splitted_buffered_polygon.IsValid() == False:
+								
+									for linear_ring_splitted_buffered_polygon in splitted_buffered_polygon:
+										
+										""" Add linear_ring_splitted_buffered_polygon to new polygon. """
+										
+										polygon_part_splitted_buffered_polygon = ogr.Geometry(ogr.wkbPolygon)
+										polygon_part_splitted_buffered_polygon.AddGeometry(linear_ring_splitted_buffered_polygon)
+										polygon_part_splitted_buffered_polygon = polygon_part_splitted_buffered_polygon.Buffer(0)
+										
+									if polygon_part_splitted_buffered_polygon.IsValid() == False:
+										print "Error due to severe self-intersection during buffering. Please use shapefile output and check the modified shapefile for errors."
+										ctypes.windll.user32.MessageBoxA(0, "Error due to severe self-intersection during buffering.", "Error", 0)
+										if write_logfile == True and multicore_operation == False:
+											logfile.flush()
+										
+										BNSC_union_polygon = BNSC_union_polygon.Union(polygon_part_splitted_buffered_polygon)
+								
+								if splitted_buffered_polygon.IsValid() == True:
+									
+									BNSC_union_polygon = BNSC_union_polygon.Union(splitted_buffered_polygon)
+							
+							""" Special case: If only one research area with hole(s) is investigated, iteration in union_polygon would not consider polygon1, polygon2, 
+							polygon3, etc., but ring1, ring2, ring3, etc. As the inner ring is already considered during iteration (because it is assumed that in 'for area in union_polygon' 
+							area is a research area and not a linear ring), the function has to be stopped here. Otherwise, every further iteration in union polygon would consider 
+							the linear rings which have already been considered in the function. This would lead to too many resulting polygons (rings*no_of_craters and not no_of_craters). """
+							
+							if len(Area_IDs) == 1 and number_of_inner_polygons == 0 and number_of_holes >= 1:
+								break
+						
+						""" Project union_polygon & BNSC_union_polygon back to original spatial reference (to be used in NSC_BNSC_exclude_craters function). """
+						
+						BNSC_union_polygon.Transform(geogr_reprojection_to_proj_reprojection)
+						BNSC_union_polygon.Transform(proj_reprojection_to_geogr)
+						
+						union_polygon.Transform(geogr_reprojection_to_proj_reprojection)
+						union_polygon.Transform(proj_reprojection_to_geogr)
+						
+						if sr.IsProjected(): 
+							union_polygon.Transform(geog_to_proj)
+							BNSC_union_polygon.Transform(geog_to_proj)
+			
+			#########################
+			#						#
+			# END OF BNSC BUFFERING	#
+			#						#
+			#########################
+			
+			if approach == "NSC":
+				union_polygon.Transform(sr_to_eq_area)
+				geodesic_area = union_polygon.GetArea()/1000000
+				union_polygon.Transform(eq_area_to_sr)
+				
+				""" Exclude craters outside reference area for CSFD measurement (NSC only). """
+				
+				if distance_crater_area > 0:
+					crater_index += 1
 					continue
 					
-				BNSC_union_polygon.Transform(eq_area_to_sr)
-				
 				if generate_polygon_file == True:
-					polygon_feature.SetGeometry(BNSC_union_polygon) 
+					polygon_feature.SetGeometry(union_polygon) 
 					polygon_feature.SetField('Size_sq_km', geodesic_area)
 					polygon_feature.SetField('crater_ID', original_crater_id)
 					layer_polygon.CreateFeature(polygon_feature)
@@ -3523,18 +3569,72 @@ def NSC_BNSC_exclude_craters(approach, buffered_craters_wkt_list, union_polygon,
 				crater_X = craters_for_counting_list[crater_index][2]
 				crater_Y = craters_for_counting_list[crater_index][3]
 				crater_area_list.append([crater_diam, crater_X, crater_Y, crater_diam * bufferfactor_crater, geodesic_area])
+			
+			if approach == "BNSC":
 				
-				del BNSC_union_polygon
+				""" 'If BNSC_union_polygon' condition is used to only write geometry to shapefile if buffering took place. Otherwise 
+				 extra geometries would be added here during multicore processing.  """
+				
+				if 'BNSC_union_polygon' in locals() or 'BNSC_union_polygon' in globals():
+					BNSC_union_polygon.Transform(sr_to_eq_area)
+					geodesic_area = BNSC_union_polygon.GetArea()/1000000
+					
+					if geodesic_area == 0:
+						
+						""" This is a special case. If two large craters cut the reference area (the reference area is completely superposed 
+						by crater + ejecta blanket), the smaller crater will not be used to buffer the area even though it cuts the reference 
+						area and is located distant enough to the larger crater to be (theoretically) included in the counting. Since the area is 
+						eliminated by the larger crater + ejecta blanket already, there is nothing to buffer (geodesic area size = 0). 
+						This is a matter of dimensions. The suitability of the reference area for CSFD measurements should be investigated again. """
+						
+						continue
+						
+					BNSC_union_polygon.Transform(eq_area_to_sr)
+					
+					if generate_polygon_file == True:
+						polygon_feature.SetGeometry(BNSC_union_polygon) 
+						polygon_feature.SetField('Size_sq_km', geodesic_area)
+						polygon_feature.SetField('crater_ID', original_crater_id)
+						layer_polygon.CreateFeature(polygon_feature)
+					
+					crater_diam = craters_for_counting_list[crater_index][1]
+					crater_X = craters_for_counting_list[crater_index][2]
+					crater_Y = craters_for_counting_list[crater_index][3]
+					crater_area_list.append([crater_diam, crater_X, crater_Y, crater_diam * bufferfactor_crater, geodesic_area])
+					
+					del BNSC_union_polygon
+			
+			crater_index += 1
+			
+			""" Write status information """
+			
+			current_status_percent = round(((float(crater_index) / float(len(craters_for_counting_list)))*100), 2)
+			
+			if multicore_operation == True:
+				current_status = [process_count, current_status_percent]
+				status_out_q.put(current_status)
+				
+			if multicore_operation == False or approach == "NSC":
+				results_percent = current_status_percent
+				self.update_process_label("Process 3/3 Modifying reference areas... " + str(results_percent) +"%")
+				QApplication.processEvents()
+			
+		""" Indicator when multicore operation is finished """
 		
-		crater_index += 1
-	crater_area_out_q.put(crater_area_list)
-	print process_count, "Done."
-	
-	""" Detailled logfile is only written in single-core mode """
-	
-	if write_logfile == True and multicore_operation == False:
-		logfile.write("Done.\n")
-		logfile.flush()
+		if multicore_operation == True:
+			status_out_q.put(9999999999)
+			
+		crater_area_out_q.put(crater_area_list)
+		
+		print process_count, "Done."
+		
+		if write_logfile == True and multicore_operation == False:
+			logfile.flush()
+
+	except Exception, e:
+		print "\nCSFD measurement failed due to severe exception: \n" + str(e) + "\n" + str(gdal.GetLastErrorMsg()) + "\nScript canceled!"
+		ctypes.windll.user32.MessageBoxA(0, "CSFD measurement failed due to severe exception. Please check modified shapefile geometries and logfile.", "Error", 0)
+		return
 
 """ Calculate fractions from craters and individual buffer areas. Until here, if more than one (n) research area was selected, the crater_area_list 
  stores informartion about every crater for every individual research area (crater1 - geodesic_area_1, crater1 - geodesic_area_2). As fractions 
@@ -3648,7 +3748,7 @@ def write_crater_stats_file_area(n_area, area_feature, area_feature2, area_featu
 	
 	print "Area ", Area_ID, ":\n", "Number of Polygon vertices: ", no_of_polygon_vertices, "\n"
 	if write_logfile == True:
-		logfile.write("Area " + str(Area_ID) + ":\n" + "Number of Polygon vertices: " + str(no_of_polygon_vertices) + "\n")
+		logfile.flush()
 
 	for vertex in xrange(no_of_polygon_vertices):
 		current_vertex_X, current_vertex_Y, z = area_polygon_SCC_File.GetPoint(vertex)
@@ -3791,6 +3891,8 @@ def user_interface():
 
 if __name__ == '__main__':
 	multiprocessing.freeze_support()
+	
+	gdal.UseExceptions()
 	
 	""" Suppress error messages which may occur during multi-core operation """
 	
