@@ -26,3 +26,10 @@ CSFD measurements are saved in an SCC or DIAM textfile for further statistical a
 
 CSFD Tools supports measurements on spheres and biaxial ellipsoids. This includes areas which intersect the Date Line. The implemented techniques are valid for CSFD measurements on planetary bodies that can be approximated by a biaxial ellipsoid with a flattening of 0.3 or lower. Data processing can be parallelized for multi-core support to increase performance. 
 
+# Limitations
+
+CSFD measurements on reference areas which intersect the poles of a planetary body are not supported at this point. We suggest to shift the datasets towards the equator to avoid polar intersections. We will consider this issue for our future work. 
+
+Reference areas which intersect the Date Line are not displayed correctly in the user interface. However, this does not affect the accuracy of the CSFD measurements. 
+
+Data processing in multi-core mode is usually faster when compared to single-core. However, since it takes longer to start a multi-core process, the increase in performance is not significant when the number of impact craters is relatively low (< ~150 craers). In such cases, single-core data processing may be faster. 
