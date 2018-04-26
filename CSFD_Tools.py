@@ -1234,14 +1234,15 @@ def CSFD_measurement_main(self, generate_polygon_file, path_to_outfile, outfile_
 			
 			crater_area_out_q = multiprocessing.Queue()
 			
+			multicore_log_out_q = multiprocessing.Queue()
+			
 			processes = dict()
 			process_count = 0
 			
 			""" Process definition """
 			
 			for craters_for_counting_list_BNSC_splitted_part in craters_for_counting_list_BNSC_splitted:
-				
-				processes[process_count] = Process(target = NSC_BNSC_exclude_craters, args=(0, approach, buffered_craters_wkt_list, union_polygon, sr_wkt, generate_polygon_file, path_to_outfile, craters_for_counting_list, craters_for_counting_list_BNSC_splitted_part, multicore_operation, layer_polygon, bufferfactor, bufferfactor_crater, process_count, crater_area_out_q, flattening, major_axis, Area_IDs, write_logfile, logfile, status_out_q)) # self is set to 0 to avoid duplication of user interface during multi-core computation
+				processes[process_count] = Process(target = NSC_BNSC_exclude_craters, args=(0, approach, buffered_craters_wkt_list, union_polygon, sr_wkt, generate_polygon_file, path_to_outfile, craters_for_counting_list, craters_for_counting_list_BNSC_splitted_part, multicore_operation, layer_polygon, bufferfactor, bufferfactor_crater, process_count, crater_area_out_q, flattening, major_axis, Area_IDs, write_logfile, logfile, status_out_q, multicore_log_out_q)) # self is set to 0 to avoid duplication of user interface during multi-core computation
 				process_count += 1
 			process_count2 = 0
 			
@@ -1266,7 +1267,6 @@ def CSFD_measurement_main(self, generate_polygon_file, path_to_outfile, outfile_
 				else:
 					statuses_percent[result_q[0]] = result_q[1]
 					results_percent = round(sum(statuses_percent)/len(craters_for_counting_list_BNSC_splitted), 2)
-					#print results_percent
 					
 					self.update_process_label("Process 3/3 Modifying reference areas... " + str(results_percent) +"%")
 					QApplication.processEvents()
@@ -1283,6 +1283,16 @@ def CSFD_measurement_main(self, generate_polygon_file, path_to_outfile, outfile_
 				else:
 					crater_area_list = crater_area_list + crater_area_from_multiprocessing
 
+				""" Get logfile information """
+			
+				if write_logfile == True:
+					logfile_part_from_multiprocessing = multicore_log_out_q.get()
+					
+					""" Write information to logfile. """
+					
+					for logfile_item in logfile_part_from_multiprocessing:
+						logfile.write(str(logfile_item[0]) + "\n")	
+
 			""" Terminate Processes. """
 			
 			process_count3 = 0
@@ -1294,9 +1304,10 @@ def CSFD_measurement_main(self, generate_polygon_file, path_to_outfile, outfile_
 		""" During NSC, craters are removed from the reference area in single-core mode. Multi-core is not efficient at this point. """
 		
 		if multicore_operation == False or approach == "NSC":
+			multicore_log_out_q = multiprocessing.Queue()
 			process_count = 0 # placeholder
 			crater_area_out_q = multiprocessing.Queue() # placeholder
-			NSC_BNSC_exclude_craters(self, approach, buffered_craters_wkt_list, union_polygon, sr_wkt, generate_polygon_file, path_to_outfile, craters_for_counting_list, craters_for_counting_list_BNSC, multicore_operation, layer_polygon, bufferfactor, bufferfactor_crater, process_count, crater_area_out_q, flattening, major_axis, Area_IDs, write_logfile, logfile, status_out_q)
+			NSC_BNSC_exclude_craters(self, approach, buffered_craters_wkt_list, union_polygon, sr_wkt, generate_polygon_file, path_to_outfile, craters_for_counting_list, craters_for_counting_list_BNSC, multicore_operation, layer_polygon, bufferfactor, bufferfactor_crater, process_count, crater_area_out_q, flattening, major_axis, Area_IDs, write_logfile, logfile, status_out_q, multicore_log_out_q)
 		
 		if approach == "NSC":
 			print "\n-----\n\n", len(craters_for_counting_list) - len(crater_area_list), "craters removed due to location outside reference area.\n", len(crater_area_list), "areas created. \n\nElapsed time for area modification:", str(round(time.time() - st_buffer, 2)), "sec.\n\n_____\n" 
@@ -2869,10 +2880,6 @@ def buffer_area(self, union_polygon, crater_area_list, all_craters, sr_wkt, gene
 								logfile.flush()
 							if write_logfile == True and multicore_operation == True:
 								multicore_log.append(["Error due to severe self-intersection during buffering. Please use shapefile output and check the modified shapefile for errors."])
-								#multicore_log.append(["\nCSFD measurement failed due to severe exception: \n" + str(gdal.GetLastErrorMsg()) + "\nScript canceled!"])
-								#multicore_log_out_q.put(multicore_log)
-								#ctypes.windll.user32.MessageBoxA(0, "CSFD measurement failed due to severe exception. Please check modified shapefile geometries and logfile.", "Error", 0)
-								#return
 								raise Exception("Self-intersection")
 						
 						BCC_union_polygon = BCC_union_polygon.Union(polygon_part_splitted_buffered_polygon)
@@ -2949,7 +2956,7 @@ def buffer_area(self, union_polygon, crater_area_list, all_craters, sr_wkt, gene
 		if write_logfile == True and multicore_operation == True:
 			multicore_log.append(["\nCSFD measurement failed due to severe exception: \n" + str(e) + "\n" + str(gdal.GetLastErrorMsg()) + "\nScript canceled!"])
 			multicore_log_out_q.put(multicore_log)
-		return #PROBLEM IM MC BEI RETURN! - RICHTIG BEHINDERT - KANN ICH ALLES BEENDEN WENN HIER WAS SCHIEF LAEUFT?
+		return
 	
 	""" Buffer craters to define the size of ejecta blankets. """
 	
@@ -3040,16 +3047,16 @@ def NSC_BNSC_buffer_craters(buffered_craters_out_q, craters_for_counting_list, f
 	except Exception, e:
 		print "\nCSFD measurement failed due to severe exception: \n" + str(e) + "\n" + str(gdal.GetLastErrorMsg()) + "\nScript canceled!"
 		ctypes.windll.user32.MessageBoxA(0, "CSFD measurement failed due to severe exception. Please check modified shapefile geometries and logfile.", "Error", 0)
-		return
+		return 
 
 """ Modify initial reference areas for NSC and BNSC. """
 
-def NSC_BNSC_exclude_craters(self, approach, buffered_craters_wkt_list, union_polygon, sr_wkt, generate_polygon_file, path_to_outfile, craters_for_counting_list, craters_for_counting_list_BNSC, multicore_operation, layer_polygon, bufferfactor, bufferfactor_crater, process_count, crater_area_out_q, flattening, major_axis, Area_IDs, write_logfile, logfile, status_out_q):
+def NSC_BNSC_exclude_craters(self, approach, buffered_craters_wkt_list, union_polygon, sr_wkt, generate_polygon_file, path_to_outfile, craters_for_counting_list, craters_for_counting_list_BNSC, multicore_operation, layer_polygon, bufferfactor, bufferfactor_crater, process_count, crater_area_out_q, flattening, major_axis, Area_IDs, write_logfile, logfile, status_out_q, multicore_log_out_q):
 	from shapely.geometry import Point
 	global crater_area_list
 	
 	try:
-			
+		multicore_log = []
 		crater_area_list = []
 		
 		""" Convert spatial reference from wkt to spatial reference type (during multiprocessing). Also, Transformations etc. need to be defined as Spatial reference data type can't
@@ -3167,10 +3174,10 @@ def NSC_BNSC_exclude_craters(self, approach, buffered_craters_wkt_list, union_po
 			if len(craters_for_counting_list) > 0:
 				print "Process", process_count, ": Processing crater", original_crater_id, ":", round(((float(crater_index) / float(len(craters_for_counting_list)))*100), 1), "%"
 				
-				""" Detailled logfile is only written in single-core mode """
-				
 				if write_logfile == True and multicore_operation == False:
 					logfile.flush()
+				if write_logfile == True and multicore_operation == True:
+					multicore_log.append(["Process " + str(process_count) + " : Processing crater " + str(original_crater_id) + " : " + str (round(((float(crater_index) / float(len(craters_for_counting_list)))*100), 1)) + " %"])
 			
 			""" Start with largest crater, erase larger craters (craters with index -1) from initial reference area """
 			
@@ -3203,6 +3210,7 @@ def NSC_BNSC_exclude_craters(self, approach, buffered_craters_wkt_list, union_po
 					BNSC_crater_id = BNSC_crater[0]
 					
 					if BNSC_crater_id == original_crater_id:
+						
 						BNSC_crater_diameter = BNSC_crater[1]
 						buffer_distance_polygon_BNSC = ((BNSC_crater_diameter * 1000)/2) * bufferfactor
 						
@@ -3515,6 +3523,9 @@ def NSC_BNSC_exclude_craters(self, approach, buffered_craters_wkt_list, union_po
 										ctypes.windll.user32.MessageBoxA(0, "Error due to severe self-intersection during buffering.", "Error", 0)
 										if write_logfile == True and multicore_operation == False:
 											logfile.flush()
+										if write_logfile == True and multicore_operation == True:
+											multicore_log.append(["Error due to severe self-intersection during buffering. Please use shapefile output and check the modified shapefile for errors."])
+											raise Exception("Self-intersection")
 										
 										BNSC_union_polygon = BNSC_union_polygon.Union(polygon_part_splitted_buffered_polygon)
 								
@@ -3630,11 +3641,21 @@ def NSC_BNSC_exclude_craters(self, approach, buffered_craters_wkt_list, union_po
 		
 		if write_logfile == True and multicore_operation == False:
 			logfile.flush()
+		if write_logfile == True and multicore_operation == True:
+			multicore_log.append(["Done."])		
+			
+		""" Logfile """
+		
+		if write_logfile == True and multicore_operation == True:
+			multicore_log_out_q.put(multicore_log)
 
 	except Exception, e:
 		print "\nCSFD measurement failed due to severe exception: \n" + str(e) + "\n" + str(gdal.GetLastErrorMsg()) + "\nScript canceled!"
 		ctypes.windll.user32.MessageBoxA(0, "CSFD measurement failed due to severe exception. Please check modified shapefile geometries and logfile.", "Error", 0)
-		return
+		if write_logfile == True and multicore_operation == True:
+			multicore_log.append(["\nCSFD measurement failed due to severe exception: \n" + str(e) + "\n" + str(gdal.GetLastErrorMsg()) + "\nScript canceled!"])
+			multicore_log_out_q.put(multicore_log)
+		return # problem with return during multi-core - needs further attention in the future!
 
 """ Calculate fractions from craters and individual buffer areas. Until here, if more than one (n) research area was selected, the crater_area_list 
  stores informartion about every crater for every individual research area (crater1 - geodesic_area_1, crater1 - geodesic_area_2). As fractions 
