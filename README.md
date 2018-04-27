@@ -32,4 +32,4 @@ CSFD measurements on reference areas which intersect the poles of a planetary bo
 
 Reference areas which intersect the Date Line are not displayed correctly in the user interface. However, this does not affect the accuracy of the CSFD measurements. 
 
-Data processing in multi-core mode is usually faster when compared to single-core. However, since it takes longer to start a multi-core process, the increase in performance is not significant when the number of impact craters is relatively low (< ~150 craers). In such cases, single-core data processing may be faster. 
+Data processing in multi-core mode is usually faster when compared to single-core. However, since starting the individial multi-core processes takes longer than to start a single-core process, the increase in performance is not significant when the number of impact craters is relatively low (< ~150 craters). In such cases, single-core data processing is usually faster. 
