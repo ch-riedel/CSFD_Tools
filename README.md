@@ -14,7 +14,7 @@ PyQT4, Matplotlib Basemap, and descartes for the user interface layout
 Numpy for array management  
 
 All libraries are included in the compiled version of CSFD Tools. No further software is required.  
-The compiled version was tested on Windows 7. 
+The compiled version was tested on Windows 7 and Windows 10. 
 
 # Description
 
