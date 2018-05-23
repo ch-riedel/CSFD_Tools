@@ -5,10 +5,11 @@ Currently in beta version.
 The compiled version of this tool can be downloaded here:  
 http://www.geo.fu-berlin.de/en/geol/fachrichtungen/planet/software/index.html#faq_csfdtools.
 
-Scientific publications using CSFD Tools can use the following article as a reference:
+Scientific publications using CSFD Tools can use the following article as a reference:  
 https://doi.org/10.1002/2018EA000383
 
-Problems or suggestions to christian.riedel[at]fu-berlin.de
+Problems or suggestions to:  
+christian.riedel[at]fu-berlin.de
 
 # Requirements
 
