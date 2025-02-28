@@ -1,14 +1,14 @@
 # CSFD Tools
 A tool to conduct crater size-frequency distribution (CSFD) measurements on planetary bodies from polygon shapefiles.
 
-The compiled version of this tool can be downloaded here:  
-http://www.planet.geo.fu-berlin.de/transfer/TRR170/CSFD-Tools/CSFD_Tools_64bit.exe.
+The compiled version of this tool can be downloaded here: 
+https://doi.org/10.5281/zenodo.14946092
 
 Scientific publications using CSFD Tools can use the following article as a reference:  
 https://doi.org/10.1002/2018EA000383
 
 Problems or suggestions to:  
-christian.riedel[at]fu-berlin.de
+christian.riedel[at]uni-potsdam.de
 
 # Requirements
 
